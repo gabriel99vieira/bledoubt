@@ -1,8 +1,8 @@
 package hawk.privacy.bledoubt;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.Date;
 
 /**
  * A thread-safe wrapper around a HashTable of beaconsIds -> beaconDetection lists.
@@ -57,9 +57,3 @@ public class BeaconHistory {
 
 }
 
-class BeaconDetection {
-    public Date timestamp;
-    public double latitude;
-    public double longitude;
-    public double distanceEstimate;
-}

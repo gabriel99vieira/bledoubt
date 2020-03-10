@@ -20,7 +20,7 @@ import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
 import java.util.Collection;
-
+import java.util.Date;
 
 
 
@@ -33,6 +33,7 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
 
     protected static final String TAG = "[RadarActivity]";
     private BeaconManager beaconManager;
+    private BeaconHistory beaconHistory;
 
     private void initUI() {
         setContentView(R.layout.activity_radar);
@@ -42,7 +43,7 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
         final Button radar_button = findViewById(R.id.radar_button);
         radar_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Log.i(TAG, "Hit the on-click listener.");
+                Log.i(TAG, beaconHistory.toString());
             }
         });
 
@@ -66,6 +67,11 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
                 if (beacons.size() > 0) {
                     Log.i(TAG, "The first beacon I see is about "+beacons.iterator().next().getDistance()+" meters away.");
                 }
+
+                for (Beacon beacon : beacons) {
+                    double distance = beacon.getDistance();
+                    beaconHistory.add(beacon.getBluetoothAddress(), new BeaconDetection(new Date(), 0,0,distance));
+                }
             }
 
         });
@@ -79,6 +85,7 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        beaconHistory = new BeaconHistory();
         beaconManager = BeaconManager.getInstanceForApplication(this);
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_LAYOUT));
         beaconManager.bind(this);
@@ -96,6 +103,10 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_radar, menu);
         return true;
+    }
+
+    protected void storeBeacon(Beacon beacon) {
+
     }
 
     @Override
