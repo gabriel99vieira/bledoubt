@@ -1,5 +1,9 @@
 package hawk.privacy.bledoubt;
 
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.design.widget.FloatingActionButton;
@@ -34,6 +38,8 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
     protected static final String TAG = "[RadarActivity]";
     private BeaconManager beaconManager;
     private BeaconHistory beaconHistory;
+    private LocationManager locationManager;
+    private LocationTracker locationTracker;
 
     private void initUI() {
         setContentView(R.layout.activity_radar);
@@ -44,6 +50,7 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
         radar_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.i(TAG, beaconHistory.toString());
+                beaconHistory.save();
             }
         });
 
@@ -70,7 +77,10 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
 
                 for (Beacon beacon : beacons) {
                     double distance = beacon.getDistance();
-                    beaconHistory.add(beacon.getBluetoothAddress(), new BeaconDetection(new Date(), 0,0,distance));
+                    Location loc = locationTracker.getLastLocation();
+                    if (loc != null) {
+                        beaconHistory.add(beacon.getBluetoothAddress(), new BeaconDetection(new Date(), loc, distance));
+                    }
                 }
             }
 
@@ -89,6 +99,9 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
         beaconManager = BeaconManager.getInstanceForApplication(this);
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_LAYOUT));
         beaconManager.bind(this);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        locationTracker = new LocationTracker(locationManager);
         initUI();
     }
 
