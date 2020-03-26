@@ -6,6 +6,7 @@ import android.util.Pair;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -40,6 +41,12 @@ public class BeaconHistory {
             macs.add(mac);
         }
         return macs;
+    }
+
+    public synchronized void remove_all(Collection<String> macs) {
+        for (String mac : macs) {
+            this.detections.remove(mac);
+        }
     }
 
     /**

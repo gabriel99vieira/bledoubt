@@ -2,15 +2,20 @@ package hawk.privacy.bledoubt;
 
 import org.altbeacon.beacon.Beacon;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
+
+
 public class HistoryAnalyzer {
+    static final double MAX_BLE_RANGE_M = 10;
      //public static Vector<Beacon> findTrackingBeacons( BeaconHistory _history) {
       //  BeaconHistory history = new BeaconHistory(_history);
       //  removeGeostationaryDevices(history);
    // }
 
     private static void removeGeostationaryDevices(BeaconHistory history) {
+        ArrayList<String> macs_to_remove = new ArrayList<>();
         double latMin, latMax, longMin, longMax;
         for (String mac : history.geKnownMacs()) {
             latMin = latMax = longMin = longMax = 0;
@@ -21,8 +26,11 @@ public class HistoryAnalyzer {
                 longMin = Math.min(detection.longitude, longMin);
                 longMax = Math.max(detection.longitude, longMax);
             }
-
+            if (latLongToMeters(latMin, longMin, latMax, longMax) < 2 * MAX_BLE_RANGE_M) {
+                macs_to_remove.add(mac);
+            }
         }
+        history.remove_all(macs_to_remove);
     }
 
     /**
@@ -32,7 +40,7 @@ public class HistoryAnalyzer {
      * Using Haversine formula as seen in this stack overflow post:
      * https://stackoverflow.com/questions/18861728/calculating-distance-between-two-points-represented-by-lat-long-upto-15-feet-acc
      */
-    public static double latLongToMeters(double latDegrees1, double longDegrees1, double latDegrees2, double longDegrees2 ) {
+    public static double latLongToMeters(double latDegrees1, double longDegrees1, double latDegrees2, double longDegrees2) {
         final double radiusOfEarthMeters = 6378100;
         double dLat = Math.toRadians(latDegrees2 - latDegrees1);
         double dLong = Math.toRadians(longDegrees2 - longDegrees1);
