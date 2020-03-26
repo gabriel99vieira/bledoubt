@@ -70,23 +70,14 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
         beaconManager.addRangeNotifier(new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-                Log.i(TAG, "Scanning");
-                if (beacons.size() > 0) {
-                    Log.i(TAG, "The first beacon I see is about "+beacons.iterator().next().getDistance()+" meters away.");
-                }
-
                 for (Beacon beacon : beacons) {
-                    double distance = beacon.getDistance();
-                    Location loc = locationTracker.getLastLocation();
-                    if (loc != null) {
-                        beaconHistory.add(beacon.getBluetoothAddress(), new BeaconDetection(new Date(), loc, distance));
-                    }
+                    storeBeacon(beacon);
                 }
             }
 
         });
         try {
-        beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
+            beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
         } catch (RemoteException e) {
             Log.i(TAG, e.getMessage());
         }
@@ -100,7 +91,6 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_LAYOUT));
         beaconManager.bind(this);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
         locationTracker = new LocationTracker(locationManager);
         initUI();
     }
@@ -119,7 +109,11 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
     }
 
     protected void storeBeacon(Beacon beacon) {
-
+        double distance = beacon.getDistance();
+        Location loc = locationTracker.getLastLocation();
+        if (loc != null) {
+            beaconHistory.add(beacon.getBluetoothAddress(), new BeaconDetection(new Date(), loc, distance));
+        }
     }
 
     @Override

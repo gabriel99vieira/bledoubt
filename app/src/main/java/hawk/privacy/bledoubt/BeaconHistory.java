@@ -5,6 +5,7 @@ import android.util.Pair;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -26,6 +27,22 @@ public class BeaconHistory {
     }
 
     /**
+     * TODO: Make a copy constructor.
+     * @param other
+     */
+    public BeaconHistory (BeaconHistory other) {
+
+    }
+
+    public ArrayList<String> geKnownMacs() {
+        ArrayList<String> macs = new ArrayList();
+        for (String mac : detections.keySet()) {
+            macs.add(mac);
+        }
+        return macs;
+    }
+
+    /**
      * Append a new detection event onto the history of the specified beacon.
      * @param beaconId
      * @param detectionEvent
@@ -42,9 +59,9 @@ public class BeaconHistory {
      * @param beaconId
      * @return
      */
-    public synchronized Vector<BeaconDetection> getSnapshot(String beaconId) {
-        if (detections.containsKey(beaconId)) {
-            return new Vector<>(detections.get(beaconId));
+    public synchronized Vector<BeaconDetection> getSnapshot(String mac) {
+        if (detections.containsKey(mac)) {
+            return new Vector<>(detections.get(mac));
         }
         return new Vector<>();
     }
