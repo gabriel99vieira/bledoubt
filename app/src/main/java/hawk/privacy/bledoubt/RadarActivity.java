@@ -1,20 +1,22 @@
 package hawk.privacy.bledoubt;
 
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Toolbar;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -23,12 +25,16 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 
-
-public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
+public class RadarActivity extends Activity implements BeaconConsumer {
     public static final String ALTBEACON_LAYOUT = "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25";
     public static final String TLM_LAYOUT = "x,s:0-1=feaa,m:2-2=20,d:3-3,d:4-5,d:6-7,d:8-11,d:12-15";
     public static final String EDDYSTONE_UID_LAYOUT =  "s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19";
@@ -44,7 +50,7 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
     private void initUI() {
         setContentView(R.layout.activity_radar);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setActionBar(toolbar);
 
         final Button radar_button = findViewById(R.id.radar_button);
         radar_button.setOnClickListener(new View.OnClickListener() {
@@ -62,6 +68,16 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer {
                         .setAction("Action", null).show();
             }
         });
+
+        List<DeviceMainMenuViewModel> models = new ArrayList<>();
+        models.add(new DeviceMainMenuViewModel("Tile 1"));
+        models.add(new DeviceMainMenuViewModel("iBeacon 1"));
+        DeviceMainMenuViewAdapter adapter = new DeviceMainMenuViewAdapter(models);
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_menu_recyclerview);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
