@@ -15,7 +15,7 @@ public class DeviceMainMenuViewHolder extends RecyclerView.ViewHolder {
         view = (TextView) itemView.findViewById(R.id.deviceIdentifier1);
     }
 
-    public void bindData(final DeviceMainMenuViewModel viewModel) {
+    public void bindData(final DeviceMetadata viewModel) {
         view.setText(viewModel.getIdentifier());
     }
 

@@ -17,7 +17,7 @@ public class HistoryAnalyzer {
     private static void removeGeostationaryDevices(BeaconHistory history) {
         ArrayList<String> macs_to_remove = new ArrayList<>();
         double latMin, latMax, longMin, longMax;
-        for (String mac : history.geKnownMacs()) {
+        for (String mac : history.getKnownMacs()) {
             latMin = latMax = longMin = longMax = 0;
             Vector<BeaconDetection> traiectory = history.getSnapshot(mac);
             for (BeaconDetection detection : traiectory) {

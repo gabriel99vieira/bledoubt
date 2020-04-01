@@ -1,7 +1,5 @@
 package hawk.privacy.bledoubt;
 
-import android.bluetooth.BluetoothClass;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -12,12 +10,15 @@ import android.view.ViewGroup;
 import java.util.List;
 
 public class DeviceMainMenuViewAdapter extends RecyclerView.Adapter {
-    List<DeviceMainMenuViewModel> models;
+    List<DeviceMetadata> models;
 
-    public DeviceMainMenuViewAdapter(List<DeviceMainMenuViewModel> models) {
+    public DeviceMainMenuViewAdapter(List<DeviceMetadata> models) {
         this.models = models;
     }
 
+    public void setModels(List<DeviceMetadata>  models) {
+        this.models = models;
+    }
 
     @NonNull
     @Override

@@ -1,7 +1,6 @@
 package hawk.privacy.bledoubt;
 
 import android.util.Log;
-import android.util.Pair;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,7 +9,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,9 +20,10 @@ import org.json.JSONObject;
 public class BeaconHistory {
     protected static final String TAG = "[BeaconHistory]";
     private HashMap<String, Vector<BeaconDetection>> detections;
-
+    private HashMap<String, DeviceMetadata> metadata;
     public BeaconHistory() {
         detections = new HashMap<>();
+        metadata = new HashMap<>();
     }
 
     /**
@@ -35,7 +34,15 @@ public class BeaconHistory {
 
     }
 
-    public ArrayList<String> geKnownMacs() {
+    public synchronized ArrayList<DeviceMetadata> getMainMenuViewModels() {
+        ArrayList<DeviceMetadata> result = new ArrayList<>();
+        for (String mac : getKnownMacs()) {
+            result.add(metadata.get(mac));
+        }
+        return result;
+    }
+
+    public ArrayList<String> getKnownMacs() {
         ArrayList<String> macs = new ArrayList();
         for (String mac : detections.keySet()) {
             macs.add(mac);
@@ -46,6 +53,7 @@ public class BeaconHistory {
     public synchronized void remove_all(Collection<String> macs) {
         for (String mac : macs) {
             this.detections.remove(mac);
+            this.metadata.remove(mac);
         }
     }
 
@@ -57,8 +65,10 @@ public class BeaconHistory {
     public synchronized void add(String beaconId, BeaconDetection detectionEvent) {
         if (!detections.containsKey(beaconId)) {
             detections.put(beaconId, new Vector<BeaconDetection>());
+            metadata.put(beaconId, new DeviceMetadata("New Device",beaconId,0));
         }
         detections.get(beaconId).add(detectionEvent);
+        metadata.get(beaconId).incrementDetections();
     }
 
     /**

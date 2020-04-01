@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.RemoteException;
 
@@ -46,7 +45,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     private BeaconHistory beaconHistory;
     private LocationManager locationManager;
     private LocationTracker locationTracker;
-
+    private DeviceMainMenuViewAdapter recyclerViewAdapter;
     private void initUI() {
         setContentView(R.layout.activity_radar);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -69,15 +68,20 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             }
         });
 
-        List<DeviceMainMenuViewModel> models = new ArrayList<>();
-        models.add(new DeviceMainMenuViewModel("Tile 1"));
-        models.add(new DeviceMainMenuViewModel("iBeacon 1"));
-        DeviceMainMenuViewAdapter adapter = new DeviceMainMenuViewAdapter(models);
+        List<DeviceMetadata> models = new ArrayList<>();
+        //models.add(new DeviceMetadata("Tile 1"));
+        //models.add(new DeviceMetadata("iBeacon 1"));
+        recyclerViewAdapter = new DeviceMainMenuViewAdapter(models);
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_menu_recyclerview);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(recyclerViewAdapter);
+    }
+
+    public void updateRecyclerView() {
+        this.recyclerViewAdapter.setModels(this.beaconHistory.getMainMenuViewModels());
+        recyclerViewAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -89,6 +93,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
                 for (Beacon beacon : beacons) {
                     storeBeacon(beacon);
                 }
+                updateRecyclerView();
             }
 
         });
