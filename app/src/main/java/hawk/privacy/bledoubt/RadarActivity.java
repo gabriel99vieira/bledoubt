@@ -35,7 +35,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class RadarActivity extends Activity implements BeaconConsumer {
     public static final String ALTBEACON_LAYOUT = "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25";
-    public static final String TLM_LAYOUT = "x,s:0-1=feaa,m:2-2=20,d:3-3,d:4-5,d:6-7,d:8-11,d:12-15";
+    public static final String EDDYSTONE_TLM_LAYOUT = "x,s:0-1=feaa,m:2-2=20,d:3-3,d:4-5,d:6-7,d:8-11,d:12-15";
     public static final String EDDYSTONE_UID_LAYOUT =  "s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19";
     public static final String EDDYSTONE_URL_LAYOUT =  "s:0-1=feaa,m:2-2=10,p:3-3:-41,i:4-20v";
     public static final String IBEACON_LAYOUT =  "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
@@ -69,8 +69,6 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         });
 
         List<DeviceMetadata> models = new ArrayList<>();
-        //models.add(new DeviceMetadata("Tile 1"));
-        //models.add(new DeviceMetadata("iBeacon 1"));
         recyclerViewAdapter = new DeviceMainMenuViewAdapter(models);
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_menu_recyclerview);
@@ -133,7 +131,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         double distance = beacon.getDistance();
         Location loc = locationTracker.getLastLocation();
         if (loc != null) {
-            beaconHistory.add(beacon.getBluetoothAddress(), new BeaconDetection(new Date(), loc, distance));
+            beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(new Date(), loc, distance));
         }
     }
 

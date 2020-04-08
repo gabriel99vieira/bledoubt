@@ -1,5 +1,6 @@
 package hawk.privacy.bledoubt;
 
+import android.location.Location;
 import android.util.Log;
 
 import java.io.FileWriter;
@@ -10,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.service.DetectionTracker;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,21 +62,23 @@ public class BeaconHistory {
 
     /**
      * Append a new detection event onto the history of the specified beacon.
-     * @param beaconId
-     * @param detectionEvent
+     * @param beacon: the beacon event that caused this
+     * @param type
+     * @param detection
      */
-    public synchronized void add(String beaconId, BeaconDetection detectionEvent) {
-        if (!detections.containsKey(beaconId)) {
-            detections.put(beaconId, new Vector<BeaconDetection>());
-            metadata.put(beaconId, new DeviceMetadata("New Device",beaconId,0));
+    public synchronized void add(Beacon beacon, BeaconType type, BeaconDetection detection) {
+        String mac = beacon.getBluetoothAddress();
+        if (!detections.containsKey(mac)) {
+            detections.put(mac, new Vector<BeaconDetection>());
+            metadata.put(mac, new DeviceMetadata(beacon, type));
         }
-        detections.get(beaconId).add(detectionEvent);
-        metadata.get(beaconId).incrementDetections();
+        detections.get(mac).add(detection);
+        metadata.get(mac).incrementDetections();
     }
 
     /**
      * Get a copy of a the list of all detections of the given beacon.
-     * @param beaconId
+     * @param mac: the bluetooth address of the beacon
      * @return
      */
     public synchronized Vector<BeaconDetection> getSnapshot(String mac) {

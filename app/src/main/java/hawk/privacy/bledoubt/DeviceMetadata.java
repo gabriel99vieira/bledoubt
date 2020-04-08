@@ -1,24 +1,39 @@
 package hawk.privacy.bledoubt;
 
+import org.altbeacon.beacon.Beacon;
+
 import androidx.annotation.NonNull;
 
 public class DeviceMetadata {
     private String identifier;
-    private String mac;
+    private Beacon beacon;
     private int numDetections;
+    private BeaconType type;
 
-    public DeviceMetadata(@NonNull final String identifier, @NonNull final String mac, int num_detections) {
-        this.identifier = identifier;
-        this.mac = mac;
-        this.numDetections = num_detections;
+    public DeviceMetadata (Beacon beacon, BeaconType type) {
+        this.identifier = generateIdentifier(beacon, type);
+        this.beacon = beacon;
+        this.type = type;
+        this.numDetections = 0;
     }
 
-    public String identifierFromMac(String mac) {
-        return "";
+    private static String generateIdentifier(Beacon beacon, BeaconType type) {
+        String id = "";
+        String name = beacon.getBluetoothName();
+        if (name != null && name != "") {
+            id += name;
+        } else {
+            id += beacon.getBluetoothAddress();
+        }
+        return id;
     }
 
     public String getIdentifier() {
         return identifier;
+    }
+
+    public Beacon getBeacon() {
+        return this.beacon;
     }
 
     public void setIdentifier(@NonNull final String identifier) {
