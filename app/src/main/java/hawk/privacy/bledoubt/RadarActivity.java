@@ -2,8 +2,10 @@ package hawk.privacy.bledoubt;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 
@@ -23,7 +25,13 @@ import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.json.JSONException;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -32,6 +40,10 @@ import java.util.List;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import static android.provider.MediaStore.MediaColumns.MIME_TYPE;
+import static android.provider.Settings.System.DATE_FORMAT;
+import static androidx.core.app.ActivityCompat.startActivityForResult;
+
 
 public class RadarActivity extends Activity implements BeaconConsumer {
     public static final String ALTBEACON_LAYOUT = "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25";
@@ -39,6 +51,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     public static final String EDDYSTONE_UID_LAYOUT =  "s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19";
     public static final String EDDYSTONE_URL_LAYOUT =  "s:0-1=feaa,m:2-2=10,p:3-3:-41,i:4-20v";
     public static final String IBEACON_LAYOUT =  "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
+    private static final int SAVE_TO_JSON_REQUEST_CODE = 1;
 
     protected static final String TAG = "[RadarActivity]";
     private BeaconManager beaconManager;
@@ -46,6 +59,23 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     private LocationManager locationManager;
     private LocationTracker locationTracker;
     private DeviceMainMenuViewAdapter recyclerViewAdapter;
+    private Context context;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SAVE_TO_JSON_REQUEST_CODE) {
+            Uri json_uri = data.getData();
+            try(OutputStream out = getContentResolver().openOutputStream(json_uri)) {
+                out.write(beaconHistory.toJSONObject().toString().getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     private void initUI() {
         setContentView(R.layout.activity_radar);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -55,7 +85,18 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         radar_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.i(TAG, beaconHistory.toString());
-                beaconHistory.save();
+
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("text/json");
+                //SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+                //String currentDate = sdf.format(new Date());
+                String suggestedName = "log.json";//String.format("%s%s", R.string.log_base_name, currentDate);
+                intent.putExtra(Intent.EXTRA_TITLE, suggestedName);
+                intent.putExtra(Intent.EXTRA_TEXT, beaconHistory.save(context));
+
+                startActivityForResult(intent,1);
+
             }
         });
 
@@ -107,10 +148,11 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         super.onCreate(savedInstanceState);
         beaconHistory = new BeaconHistory();
         beaconManager = BeaconManager.getInstanceForApplication(this);
-        beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON_LAYOUT));
+        beaconManager.getBeaconParsers().add(new BeaconParser(BeaconType.IBEACON.toString()).setBeaconLayout(IBEACON_LAYOUT));
         beaconManager.bind(this);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationTracker = new LocationTracker(locationManager);
+        context = getApplicationContext();
         initUI();
     }
 
@@ -129,6 +171,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
 
     protected void storeBeacon(Beacon beacon) {
         double distance = beacon.getDistance();
+        Log.i(TAG, "Parser " + beacon.getParserIdentifier());
         Location loc = locationTracker.getLastLocation();
         if (loc != null) {
             beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(new Date(), loc, distance));

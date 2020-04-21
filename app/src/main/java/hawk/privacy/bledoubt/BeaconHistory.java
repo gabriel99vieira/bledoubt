@@ -1,12 +1,23 @@
 package hawk.privacy.bledoubt;
 
+import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
+import android.os.Environment;
 import android.util.Log;
+import android.util.Pair;
+import android.widget.Toast;
 
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -16,6 +27,10 @@ import org.altbeacon.beacon.service.DetectionTracker;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static android.provider.MediaStore.MediaColumns.MIME_TYPE;
+import static android.provider.Settings.System.DATE_FORMAT;
+import static androidx.core.app.ActivityCompat.startActivityForResult;
 
 /**
  * A thread-safe wrapper around a HashTable of beaconsIds -> beaconDetection lists.
@@ -128,21 +143,26 @@ public class BeaconHistory {
         return root_object;
     }
 
-    public synchronized void save() {
-        String result = "";
+    public synchronized String save(Context context) {
+        String filename = R.string.log_base_name + new Date().toString() + ".json";
+        String fileContents;
         try {
-            result = this.toJSONObject().toString(2);
+            fileContents = this.toJSONObject().toString(2);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+        return  fileContents;
+//        Log.i(TAG, fileContents);
+//        try (FileOutputStream fos = context.openFileOutput(filename)) {
+//            Toast.makeText(context, context.getFilesDir().toString(), Toast.LENGTH_SHORT).show();
+//            fos.write(fileContents.getBytes());
+//        } catch (IOException e) {
+//            Log.i(TAG, "Failed");
+//            throw new RuntimeException(e);
 
-        try (FileWriter file = new FileWriter("device_history.json")) {
-            file.write(result);
-            file.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.i(TAG, result);
+
+
+//        }
     }
 
 

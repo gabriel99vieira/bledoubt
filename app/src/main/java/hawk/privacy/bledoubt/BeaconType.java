@@ -8,4 +8,4 @@ public enum BeaconType {
     EDDYSTONE_TLM,
     EDDYSTONE_UID,
     OTHER
-}
+};
