@@ -1,8 +1,10 @@
 package hawk.privacy.bledoubt;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -26,12 +29,10 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -39,11 +40,6 @@ import java.util.List;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import static android.provider.MediaStore.MediaColumns.MIME_TYPE;
-import static android.provider.Settings.System.DATE_FORMAT;
-import static androidx.core.app.ActivityCompat.startActivityForResult;
-
 
 public class RadarActivity extends Activity implements BeaconConsumer {
     public static final String ALTBEACON_LAYOUT = "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25";
@@ -56,24 +52,43 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     protected static final String TAG = "[RadarActivity]";
     private BeaconManager beaconManager;
     private BeaconHistory beaconHistory;
-    private LocationManager locationManager;
     private LocationTracker locationTracker;
     private DeviceMainMenuViewAdapter recyclerViewAdapter;
+    private Notifications notifications;
     private Context context;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SAVE_TO_JSON_REQUEST_CODE) {
-            Uri json_uri = data.getData();
-            try(OutputStream out = getContentResolver().openOutputStream(json_uri)) {
-                out.write(beaconHistory.toJSONObject().toString().getBytes());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
+        switch (requestCode) {
+            case SAVE_TO_JSON_REQUEST_CODE:
+                saveToJsonActivityResult(data.getData());
+                break;
         }
+    }
+
+    /**
+     * Save the BeaconHistory as a json file at the given URI
+     * @param output_json_uri
+     */
+    private void saveToJsonActivityResult(Uri output_json_uri) {
+        try(OutputStream out = getContentResolver().openOutputStream(output_json_uri)) {
+            out.write(beaconHistory.toJSONObject().toString().getBytes());
+        } catch (IOException | JSONException e) {
+            throw new RuntimeException(e);
+        }
+        Toast.makeText(context, getString(R.string.save_to_json_toast, output_json_uri),
+                Toast.LENGTH_LONG);
+    }
+
+    private void requestUriForSaveToJson() {
+        Log.i(TAG, beaconHistory.toString());
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/json");
+        String suggestedName = "log.json";
+        intent.putExtra(Intent.EXTRA_TITLE, suggestedName);
+        startActivityForResult(intent,1);
     }
 
     private void initUI() {
@@ -81,44 +96,36 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setActionBar(toolbar);
 
-        final Button radar_button = findViewById(R.id.radar_button);
-        radar_button.setOnClickListener(new View.OnClickListener() {
+        final Button radarButton = findViewById(R.id.radar_button);
+        radarButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Log.i(TAG, beaconHistory.toString());
-
-                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("text/json");
-                //SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-                //String currentDate = sdf.format(new Date());
-                String suggestedName = "log.json";//String.format("%s%s", R.string.log_base_name, currentDate);
-                intent.putExtra(Intent.EXTRA_TITLE, suggestedName);
-                intent.putExtra(Intent.EXTRA_TEXT, beaconHistory.save(context));
-
-                startActivityForResult(intent,1);
-
+                requestUriForSaveToJson();
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                notifications.CreateSuspiciousDeviceNotification(context, null);
             }
         });
 
+        initDeviceList();
+    }
+
+    private void initDeviceList() {
         List<DeviceMetadata> models = new ArrayList<>();
         recyclerViewAdapter = new DeviceMainMenuViewAdapter(models);
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_menu_recyclerview);
+        RecyclerView recyclerView = findViewById(R.id.main_menu_recyclerview);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(recyclerViewAdapter);
     }
 
-    public void updateRecyclerView() {
+    private void updateRecyclerView() {
         this.recyclerViewAdapter.setModels(this.beaconHistory.getMainMenuViewModels());
         recyclerViewAdapter.notifyDataSetChanged();
     }
@@ -134,7 +141,6 @@ public class RadarActivity extends Activity implements BeaconConsumer {
                 }
                 updateRecyclerView();
             }
-
         });
         try {
             beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
@@ -150,9 +156,12 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         beaconManager = BeaconManager.getInstanceForApplication(this);
         beaconManager.getBeaconParsers().add(new BeaconParser(BeaconType.IBEACON.toString()).setBeaconLayout(IBEACON_LAYOUT));
         beaconManager.bind(this);
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationTracker = new LocationTracker(locationManager);
         context = getApplicationContext();
+        notifications = new Notifications();
+        Notifications.createNotificationChannel(context);
+
         initUI();
     }
 
@@ -175,6 +184,12 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         Location loc = locationTracker.getLastLocation();
         if (loc != null) {
             beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(new Date(), loc, distance));
+        }
+    }
+
+    private void RequestLocationManager() {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
         }
     }
 

@@ -7,7 +7,10 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-    <string name="log_base_name">ble_history_</string>
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="log_base_name">ble_history</string>
+    <string name="save_to_json_toast">Saved to file %s.</string>
+    <string name="notification_channel_name">Suspicious device notifications</string>
+    <string name="notification_channel_desc">BLE-Doubt will notify you when a potential tracker is detected.</string>
+    <string name="suspicious_notification_title">Suspicious device found</string>
+    <string name="suspicious_notification_text">Suspicious device found</string>
 </resources>
