@@ -17,6 +17,11 @@ public class DeviceMetadata {
         this.numDetections = 0;
     }
 
+    public DeviceMetadata(DeviceMetadata other) {
+        this(other.beacon, other.type);
+        this.numDetections = other.numDetections;
+    }
+
     private static String generateIdentifier(Beacon beacon, BeaconType type) {
         String id = "";
         String name = beacon.getBluetoothName();

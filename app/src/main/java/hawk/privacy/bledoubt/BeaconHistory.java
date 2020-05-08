@@ -37,19 +37,24 @@ import static androidx.core.app.ActivityCompat.startActivityForResult;
  */
 public class BeaconHistory {
     protected static final String TAG = "[BeaconHistory]";
-    private HashMap<String, Vector<BeaconDetection>> detections;
-    private HashMap<String, DeviceMetadata> metadata;
-    public BeaconHistory() {
-        detections = new HashMap<>();
-        metadata = new HashMap<>();
-    }
+    private HashMap<String, Vector<BeaconDetection>> detections = new HashMap<>();
+    private HashMap<String, DeviceMetadata> metadata = new HashMap<>();
+
+    public BeaconHistory() {}
 
     /**
      * TODO: Make a copy constructor.
      * @param other
      */
     public BeaconHistory (BeaconHistory other) {
-
+        for (String mac : other.getKnownMacs()) {
+            this.metadata.put(mac, new DeviceMetadata(other.metadata.get(mac)));
+            Vector<BeaconDetection> mac_detections = new Vector<>();
+            for (BeaconDetection det : other.detections.get(mac)) {
+                mac_detections.add(new BeaconDetection(det));
+            }
+            detections.put(mac, mac_detections);
+        }
     }
 
     public synchronized ArrayList<DeviceMetadata> getMainMenuViewModels() {

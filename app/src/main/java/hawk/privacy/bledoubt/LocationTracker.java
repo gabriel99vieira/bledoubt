@@ -36,7 +36,11 @@ public class LocationTracker implements LocationListener {
         Log.i(TAG, "New tracker.");
 
         String provider = LocationManager.GPS_PROVIDER; //locationManager.getProvider(.to);
-        locationManager.requestLocationUpdates(provider, (long)  2 * 60*1000, (float) 10, this);//requestLocationUpdates(provider, 2 * 60 * 1000, 10, locationListener);
+        try {
+            locationManager.requestLocationUpdates(provider, (long) 2 * 60 * 1000, (float) 10, this);
+        } catch (SecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

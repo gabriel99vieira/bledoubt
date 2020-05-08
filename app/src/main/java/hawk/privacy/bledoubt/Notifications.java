@@ -44,6 +44,7 @@ public class Notifications {
 
     public void CreateSuspiciousDeviceNotification(Context context, DeviceMetadata deviceMetadata) {
         Intent startExamineDeviceActivityIntent = new Intent(context, ExamineDeviceActivity.class);
+        //startExamineDeviceActivityIntent.putExtra(ExamineDeviceActivity.)
         startExamineDeviceActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startExamineDeviceActivityIntent, 0);
 

@@ -23,12 +23,23 @@
         android:id="@+id/main_menu_recyclerview"
         android:layout_width="348dp"
         android:layout_height="279dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radar_button"
+        app:layout_constraintTop_toBottomOf="@+id/radar_switch"
         tools:ignore="MissingConstraints"
         tools:listitem="@layout/recycler_view_device" />
+
+    <Switch
+        android:id="@+id/radar_switch"
+        android:layout_width="345dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/radar_switch_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.53"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radar_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

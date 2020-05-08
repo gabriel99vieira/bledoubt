@@ -13,4 +13,9 @@
     <string name="notification_channel_desc">BLE-Doubt will notify you when a potential tracker is detected.</string>
     <string name="suspicious_notification_title">Suspicious device found</string>
     <string name="suspicious_notification_text">Suspicious device found</string>
+    <string name="radar_switch_label">Scan for BLE trackers</string>
+    <string name="permission_rationale_title">Location access required</string>
+    <string name="permission_rationale_text">BLE-Doubt needs access to your location to detect nearby trackers. We use Bluetooth radio and GPS to determine if trackers are following you.</string>
+    <string name="permission_rationale_accept">OK</string>
+    <string name="permission_rationale_dismiss">Cancel</string>
 </resources>
