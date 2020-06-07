@@ -6,30 +6,57 @@ import org.altbeacon.beacon.Beacon;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverter;
+import androidx.room.TypeConverters;
 
 /**
  * A struct representing a single time & place in which a beacon has been observed.
  */
+@Entity(primaryKeys = {"bluetoothAddress", "timestamp"})
 public class BeaconDetection {
+
+    @NonNull
+    public String bluetoothAddress;
+
+    @NonNull
+    @TypeConverters(TimestampConverter.class)
     public Date timestamp;
+
     public double latitude;
     public double longitude;
     public double distanceEstimate;
 
-    public BeaconDetection(Date timestamp, double latitude, double longitude, double distance) {
+
+
+    public BeaconDetection(String bluetoothAddress, Date timestamp, double latitude,
+                           double longitude, double distanceEstimate) {
+        this.bluetoothAddress = bluetoothAddress;
         this.timestamp = timestamp;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.distanceEstimate = distance;
+        this.distanceEstimate = distanceEstimate;
     }
 
-    public BeaconDetection(Date timestamp, Location location, double distance) {
-        this(timestamp, location.getLatitude(), location.getLongitude(), distance);
+    public BeaconDetection(Beacon beacon, Date timestamp, Location location) {
+        this(beacon.getBluetoothAddress(), timestamp, location, beacon.getDistance());
+    }
+
+    public BeaconDetection(String bluetoothAddress, Date timestamp, Location location, double distance) {
+        this(bluetoothAddress, timestamp, location.getLatitude(),
+                location.getLongitude(), distance);
     }
 
     public BeaconDetection(BeaconDetection other) {
-        this(other.timestamp, other.latitude, other.longitude, other.distanceEstimate);
+        this(other.bluetoothAddress, other.timestamp, other.latitude,
+                other.longitude, other.distanceEstimate);
     }
 
     public JSONObject toJSONObject() {
@@ -45,4 +72,23 @@ public class BeaconDetection {
         return result;
     }
 
+}
+
+class TimestampConverter {
+    static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    @TypeConverter
+    public static Date fromTimestamp(@NonNull String value) {
+        try {
+            return df.parse(value);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @TypeConverter
+    public static String toTimestamp(Date timestamp) {
+        return df.format(timestamp);
+    }
 }

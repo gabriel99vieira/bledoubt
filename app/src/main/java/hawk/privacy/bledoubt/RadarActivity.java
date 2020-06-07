@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
 
@@ -90,6 +91,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
      * Enable the BLE scanner and location tracker, collecting data to detect devices.
      */
     private void activateRadar() {
+        Log.i(TAG, "Activating Radar");
         if (beaconManager == null) {
             beaconManager = BeaconManager.getInstanceForApplication(this);
             beaconManager.getBeaconParsers().add(new BeaconParser(BeaconType.IBEACON.toString()).setBeaconLayout(IBEACON_LAYOUT));
@@ -181,7 +183,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
 
     private void initDeviceList() {
         List<DeviceMetadata> models = new ArrayList<>();
-        recyclerViewAdapter = new DeviceMainMenuViewAdapter(models);
+        recyclerViewAdapter = new DeviceMainMenuViewAdapter(models, this);
         RecyclerView recyclerView = findViewById(R.id.main_menu_recyclerview);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -190,7 +192,8 @@ public class RadarActivity extends Activity implements BeaconConsumer {
 
 
     private void updateRecyclerView() {
-        this.recyclerViewAdapter.setModels(this.beaconHistory.getMainMenuViewModels());
+        Log.i(TAG, "Update recyclerview");
+        this.recyclerViewAdapter.setModels(this.beaconHistory.getDeviceList());
         recyclerViewAdapter.notifyDataSetChanged();
     }
 
@@ -216,7 +219,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        beaconHistory = new BeaconHistory();
+        beaconHistory = BeaconHistory.getAppBeaconHistory(this);
         context = getApplicationContext();
 
         getLocationPermissions();
@@ -288,11 +291,10 @@ public class RadarActivity extends Activity implements BeaconConsumer {
 
     protected void storeBeacon(Beacon beacon) {
         if (locationTracker != null) {
-            double distance = beacon.getDistance();
-            Log.i(TAG, "Parser " + beacon.getParserIdentifier());
+            Log.i(TAG, "Parser " + beacon.getParserIdentifier() + ". Mac " + beacon.getBluetoothAddress());
             Location loc = locationTracker.getLastLocation();
             if (loc != null) {
-                beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(new Date(), loc, distance));
+                beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(beacon, new Date(), loc));
             }
         }
     }

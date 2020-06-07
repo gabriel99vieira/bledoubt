@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Environment;
 import android.util.Log;
 import android.util.Pair;
@@ -16,9 +17,11 @@ import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -28,56 +31,57 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import androidx.lifecycle.LiveData;
+import androidx.room.Database;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
+
 import static android.provider.MediaStore.MediaColumns.MIME_TYPE;
 import static android.provider.Settings.System.DATE_FORMAT;
 import static androidx.core.app.ActivityCompat.startActivityForResult;
+
 
 /**
  * A thread-safe wrapper around a HashTable of beaconsIds -> beaconDetection lists.
  */
 public class BeaconHistory {
-    protected static final String TAG = "[BeaconHistory]";
-    private HashMap<String, Vector<BeaconDetection>> detections = new HashMap<>();
-    private HashMap<String, DeviceMetadata> metadata = new HashMap<>();
 
-    public BeaconHistory() {}
+
+    private static final String TAG = "[BeaconHistory]";
+    private static final String appDbName = "beacon-history";
+
+    private HistoryDatabase db;
+    private HistoryDao dao;
+
+    private BeaconHistory(HistoryDatabase db) {
+        this.db = db;
+        this.dao = db.historyDao();
+    }
 
     /**
-     * TODO: Make a copy constructor.
-     * @param other
+     * TODO: Figure out if this actually wants to be a singleton. May want inheritance
+     * so that we're not locked into static database lookups.
+     * @return
      */
-    public BeaconHistory (BeaconHistory other) {
-        for (String mac : other.getKnownMacs()) {
-            this.metadata.put(mac, new DeviceMetadata(other.metadata.get(mac)));
-            Vector<BeaconDetection> mac_detections = new Vector<>();
-            for (BeaconDetection det : other.detections.get(mac)) {
-                mac_detections.add(new BeaconDetection(det));
-            }
-            detections.put(mac, mac_detections);
-        }
+    public static BeaconHistory getAppBeaconHistory(Context context) {
+        HistoryDatabase db = Room.databaseBuilder(context, HistoryDatabase.class, appDbName)
+                .enableMultiInstanceInvalidation()
+                .allowMainThreadQueries()
+                .build();
+        return new BeaconHistory(db);
     }
 
-    public synchronized ArrayList<DeviceMetadata> getMainMenuViewModels() {
-        ArrayList<DeviceMetadata> result = new ArrayList<>();
-        for (String mac : getKnownMacs()) {
-            result.add(metadata.get(mac));
-        }
-        return result;
+    public synchronized List<DeviceMetadata> getDeviceList() {
+        List<DeviceMetadata> out = Arrays.asList(dao.loadAllDeviceMetadata());
+        Log.i(TAG, String.valueOf(out.size()));
+        if (out.size() > 0)
+            for (DeviceMetadata d : out)
+                Log.i(TAG, String.valueOf(d.bluetoothAddress));
+        return out;
     }
 
-    public ArrayList<String> getKnownMacs() {
-        ArrayList<String> macs = new ArrayList();
-        for (String mac : detections.keySet()) {
-            macs.add(mac);
-        }
-        return macs;
-    }
-
-    public synchronized void remove_all(Collection<String> macs) {
-        for (String mac : macs) {
-            this.detections.remove(mac);
-            this.metadata.remove(mac);
-        }
+    public synchronized List<LiveData<DeviceMetadata>> getLiveDeviceList() {
+        return null;//return Arrays.asList(dao.loadAllDeviceMetadata());
     }
 
     /**
@@ -87,89 +91,64 @@ public class BeaconHistory {
      * @param detection
      */
     public synchronized void add(Beacon beacon, BeaconType type, BeaconDetection detection) {
-        String mac = beacon.getBluetoothAddress();
-        if (!detections.containsKey(mac)) {
-            detections.put(mac, new Vector<BeaconDetection>());
-            metadata.put(mac, new DeviceMetadata(beacon, type));
-        }
-        detections.get(mac).add(detection);
-        metadata.get(mac).incrementDetections();
+        Log.i(TAG, "Adding " + beacon.getBluetoothAddress());
+        dao.insertDetections(detection);
+        dao.insertMetadata(new DeviceMetadata(beacon, type));
     }
 
     /**
-     * Get a copy of a the list of all detections of the given beacon.
+     * Get a list of all detections of the given beacon.
      * @param mac: the bluetooth address of the beacon
      * @return
      */
-    public synchronized Vector<BeaconDetection> getSnapshot(String mac) {
-        if (detections.containsKey(mac)) {
-            return new Vector<>(detections.get(mac));
-        }
-        return new Vector<>();
+    public synchronized Trajectory getTrajectory(String mac) {
+        return new Trajectory(Arrays.asList(dao.getDetectionsForDevice(mac)));
     }
 
     /**
      * Remove all devices and detection events from the history.
      */
-    public synchronized void clear() {
-        detections.clear();
+    public synchronized void clearAll() {
+        dao.nukeBeaconDetections();
+        dao.nukeDeviceMetadata();
     }
 
     @Override
     public synchronized String toString() {
         String result = "Beacon History:\n";
-        for (String beaconId : detections.keySet()) {
-            result += "Beacon ID:" + beaconId +
-                       ". Num detections: " + detections.get(beaconId).size() + ".\n";
-        }
+//        for (String beaconId : detections.keySet()) {
+//            result += "Beacon ID:" + beaconId +
+//                       ". Num detections: " + detections.get(beaconId).size() + ".\n";
+//        }
         return result;
     }
 
     /**
-     * TODO: This is hard to read and should be refactored, assuming it even works.l[p
+     * TODO: This is hard to read and should be refactored, assuming it even works.
      * @return A json object describing the state of this history.
      * @throws JSONException
      */
     public synchronized JSONObject toJSONObject() throws JSONException {
 
-        JSONArray devices = new JSONArray();
-        for (Map.Entry device : detections.entrySet()) {
-            JSONArray json_detections = new JSONArray();
-            for (BeaconDetection detection : (Vector<BeaconDetection>) device.getValue()) {
-                json_detections.put(detection.toJSONObject());
-            }
-            JSONObject json_device_entry = new JSONObject();
-            json_device_entry.put("id", (String) device.getKey());
-            json_device_entry.put("history", json_detections);
-            devices.put(json_device_entry);
-        }
+//        JSONArray devices = new JSONArray();
+//        for (Map.Entry device : detections.entrySet()) {
+//            JSONArray json_detections = new JSONArray();
+//            for (BeaconDetection detection : (Vector<BeaconDetection>) device.getValue()) {
+//                json_detections.put(detection.toJSONObject());
+//            }
+//            JSONObject json_device_entry = new JSONObject();
+//            json_device_entry.put("id", (String) device.getKey());
+//            json_device_entry.put("history", json_detections);
+//            devices.put(json_device_entry);
+//        }
         JSONObject root_object = new JSONObject();
-        root_object.put("devices", devices);
+//        root_object.put("devices", devices);
         return root_object;
     }
 
-    public synchronized String save(Context context) {
-        String filename = R.string.log_base_name + new Date().toString() + ".json";
-        String fileContents;
-        try {
-            fileContents = this.toJSONObject().toString(2);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        return  fileContents;
-//        Log.i(TAG, fileContents);
-//        try (FileOutputStream fos = context.openFileOutput(filename)) {
-//            Toast.makeText(context, context.getFilesDir().toString(), Toast.LENGTH_SHORT).show();
-//            fos.write(fileContents.getBytes());
-//        } catch (IOException e) {
-//            Log.i(TAG, "Failed");
-//            throw new RuntimeException(e);
-
-
-
-//        }
-    }
-
-
 }
 
+@Database(entities = {DeviceMetadata.class, BeaconDetection.class}, version = 1)
+abstract class HistoryDatabase extends RoomDatabase {
+    public abstract HistoryDao historyDao();
+}
