@@ -2,6 +2,7 @@ package hawk.privacy.bledoubt;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -9,13 +10,34 @@ import android.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.style.layers.LineLayer;
+import com.mapbox.mapboxsdk.style.layers.Property;
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+
+import java.util.ArrayList;
+
+import androidx.annotation.NonNull;
 
 public class InspectDeviceActivity extends Activity {
     public static final String BLUETOOTH_ADDRESS_MESSAGE = "hawk.privacy.bledoubt.bluetooth_address";
+    private MapView mapView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Mapbox.getInstance(this, getResources().getString(R.string.mapbox_api_key));
+
         setContentView(R.layout.activity_inspect_device);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setActionBar(toolbar);
@@ -27,16 +49,94 @@ public class InspectDeviceActivity extends Activity {
         TextView textView = findViewById(R.id.inspect_layout_title);
         textView.setText(bluetoothAddress);
 
-        Trajectory traj = BeaconHistory.getAppBeaconHistory(this).getTrajectory(bluetoothAddress);
+        final Trajectory traj = BeaconHistory.getAppBeaconHistory(this).getTrajectory(bluetoothAddress);
         textView.setText(traj.toString());
-        //FloatingActionButton fab = findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
+
+        // Mapbox Stuff
+        mapView = findViewById(R.id.mapView);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(@NonNull MapboxMap mapboxMap) {
+                mapboxMap.setStyle(Style.MAPBOX_STREETS, new Style.OnStyleLoaded() {
+                    @Override
+                    public void onStyleLoaded(@NonNull Style style) {
+                        // Add data for trajectory to renderer;
+                        style.addSource(new GeoJsonSource("line-source",
+                            FeatureCollection.fromFeature(
+                                    trajectoryToMapFeature(traj)
+                        )));
+
+                        // Apply visual style to trajectory data
+                        style.addLayer(new LineLayer("linelayer", "line-source").withProperties(
+                                PropertyFactory.lineDasharray(new Float[] {0.01f, 2f}),
+                                PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                                PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                                PropertyFactory.lineWidth(5f),
+                                PropertyFactory.lineColor(Color.parseColor("#e55e5e"))
+                        ));
+                    }
+                });
+            }
+        });
+
     }
 
+    /**
+     * Create a displayable Mapsbox feature from the trajectory.
+     * @param traj
+     * @return feature
+     */
+    public static Feature trajectoryToMapFeature(Trajectory traj) {
+        ArrayList<Point> trajectoryCoordinates = new ArrayList<>();
+        for (BeaconDetection det : traj) {
+            trajectoryCoordinates.add(Point.fromLngLat(det.longitude, det.latitude));
+        }
+        return Feature.fromGeometry(
+                LineString.fromLngLats(trajectoryCoordinates)
+        );
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mapView.onStart();
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mapView.onStop();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
 }

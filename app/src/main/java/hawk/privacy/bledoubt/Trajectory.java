@@ -1,11 +1,12 @@
 package hawk.privacy.bledoubt;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 
-public class Trajectory {
+public class Trajectory implements  Iterable<BeaconDetection> {
     List<BeaconDetection> detections;
 
     public Trajectory(List<BeaconDetection> detections) {
@@ -16,6 +17,10 @@ public class Trajectory {
         for (BeaconDetection det : other.detections) {
             this.detections.add(new BeaconDetection(det));
         }
+    }
+
+    public Iterator<BeaconDetection> iterator() {
+        return detections.iterator();
     }
 
     @NonNull
