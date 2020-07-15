@@ -1,21 +1,40 @@
 <resources>
+    <!-- App Components -->
     <string name="app_name">BleDoubt</string>
-    <string name="action_settings">Settings</string>
     <string name="title_activity_inspect_device">InspectDeviceActivity</string>
+
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-    <string name="log_base_name">ble_history</string>
-    <string name="save_to_json_toast">Saved to file %s.</string>
+
+    <!-- Notifications -->
     <string name="notification_channel_name">Suspicious device notifications</string>
     <string name="notification_channel_desc">BLE-Doubt will notify you when a potential tracker is detected.</string>
     <string name="suspicious_notification_title">Suspicious device found</string>
     <string name="suspicious_notification_text">Suspicious device found</string>
     <string name="radar_switch_label">Scan for BLE trackers</string>
+
+    <!-- Permissions Dialog -->
     <string name="permission_rationale_title">Location access required</string>
     <string name="permission_rationale_text">BLE-Doubt needs access to your location to detect nearby trackers. We use Bluetooth radio and GPS to determine if trackers are following you.</string>
     <string name="permission_rationale_accept">OK</string>
     <string name="permission_rationale_dismiss">Cancel</string>
+
+    <!-- Confirm History Deletion Dialog -->
+    <string name="confirm_delete_title">Delete detection history?</string>
+    <string name="confirm_delete_text">Are you sure you want to delete your entire beacon detection history?</string>
+    <string name="confirm_delete_accept">Delete</string>
+    <string name="confirm_delete_dismiss">Cancel</string>
+
+    <!-- Menu Items -->
+    <string name="action_settings">Settings</string>
+    <string name="export_history">Export history</string>
+    <string name="delete_history">Delete history</string>
+
+    <!-- File IO -->
+    <string name="log_base_name">ble_history</string>
+    <string name="save_to_json_toast">Saved to file %s.</string>
+    <string name="failed_json_save_toast">Could not save to file %s.</string>
 </resources>

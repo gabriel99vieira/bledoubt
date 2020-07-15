@@ -120,23 +120,16 @@ public class RadarActivity extends Activity implements BeaconConsumer {
      * @param output_json_uri
      */
     private void saveToJsonActivityResult(Uri output_json_uri) {
-        try(OutputStream out = getContentResolver().openOutputStream(output_json_uri)) {
+        boolean success = true;
+        try (OutputStream out = getContentResolver().openOutputStream(output_json_uri)) {
             out.write(beaconHistory.toJSONObject().toString().getBytes());
         } catch (IOException | JSONException e) {
-            throw new RuntimeException(e);
+            success = false;
+            Toast.makeText(context, getString(R.string.save_to_json_toast, output_json_uri), Toast.LENGTH_LONG);
         }
-        Toast.makeText(context, getString(R.string.save_to_json_toast, output_json_uri),
-                Toast.LENGTH_LONG);
-    }
-
-    private void requestUriForSaveToJson() {
-        Log.i(TAG, beaconHistory.toString());
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("text/json");
-        String suggestedName = "log.json";
-        intent.putExtra(Intent.EXTRA_TITLE, suggestedName);
-        startActivityForResult(intent, SAVE_TO_JSON_REQUEST_CODE);
+        if (success) {
+            Toast.makeText(context, getString(R.string.failed_json_save_toast, output_json_uri), Toast.LENGTH_LONG);
+        }
     }
 
     private void initUI() {
@@ -144,12 +137,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setActionBar(toolbar);
 
-        final Button radarButton = findViewById(R.id.radar_button);
-        radarButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                requestUriForSaveToJson();
-            }
-        });
+        //final Button radarButton = findViewById(R.id.radar_button);
 
         final Switch radarSwitch = findViewById(R.id.radar_switch);
         radarSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -282,13 +270,6 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         deactivateRadar();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_radar, menu);
-        return true;
-    }
-
     protected void storeBeacon(Beacon beacon) {
         if (locationTracker != null) {
             Log.i(TAG, "Parser " + beacon.getParserIdentifier() + ". Mac " + beacon.getBluetoothAddress());
@@ -306,17 +287,54 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_radar, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.delete_history:
+                confirmAndDeleteHistory();
+                return true;
+            case R.id.export_history:
+                requestUriForSaveToJson();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+    }
 
-        return super.onOptionsItemSelected(item);
+    private void confirmAndDeleteHistory() {
+        final RadarActivity activity = this;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.confirm_delete_title)
+                .setMessage(R.string.confirm_delete_text)
+                .setPositiveButton(R.string.confirm_delete_accept, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        activity.beaconHistory.clearAll();
+                    }
+                })
+                .setNegativeButton(R.string.confirm_delete_dismiss, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create()
+                .show();
+    }
+
+    private void requestUriForSaveToJson() {
+        Log.i(TAG, beaconHistory.toString());
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/json");
+        String suggestedName = "log.json";
+        intent.putExtra(Intent.EXTRA_TITLE, suggestedName);
+        startActivityForResult(intent, SAVE_TO_JSON_REQUEST_CODE);
     }
 }

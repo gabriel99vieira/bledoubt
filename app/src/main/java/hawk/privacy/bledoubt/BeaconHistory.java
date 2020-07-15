@@ -129,9 +129,10 @@ public class BeaconHistory {
      * @throws JSONException
      */
     public synchronized JSONObject toJSONObject() throws JSONException {
-
-//        JSONArray devices = new JSONArray();
-//        for (Map.Entry device : detections.entrySet()) {
+        JSONArray devices = new JSONArray();
+        DeviceMetadata[] metadata = dao.loadAllDeviceMetadata();
+        //BeaconDetection[] detections = dao.
+        //        for (Map.Entry device : detections.entrySet()) {
 //            JSONArray json_detections = new JSONArray();
 //            for (BeaconDetection detection : (Vector<BeaconDetection>) device.getValue()) {
 //                json_detections.put(detection.toJSONObject());
