@@ -1,6 +1,8 @@
 package hawk.privacy.bledoubt;
 
 import org.altbeacon.beacon.Beacon;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
@@ -78,5 +80,22 @@ public class DeviceMetadata {
             id += beacon.getBluetoothAddress();
         }
         return id;
+    }
+
+    public JSONObject toJSONObject() {
+        JSONObject result = new JSONObject();
+        try {
+            result.put("address", bluetoothAddress);
+            result.put("name", name);
+            result.put("type", typeCode);
+            result.put("id1", id1);
+            result.put("id2", id2);
+            result.put("id3", id3);
+            result.put("manufacturer", manufacturer);
+            result.put("parserId", parserId);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 }

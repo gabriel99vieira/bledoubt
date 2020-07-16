@@ -124,26 +124,23 @@ public class BeaconHistory {
     }
 
     /**
-     * TODO: This is hard to read and should be refactored, assuming it even works.
      * @return A json object describing the state of this history.
      * @throws JSONException
      */
     public synchronized JSONObject toJSONObject() throws JSONException {
-        JSONArray devices = new JSONArray();
-        DeviceMetadata[] metadata = dao.loadAllDeviceMetadata();
-        //BeaconDetection[] detections = dao.
-        //        for (Map.Entry device : detections.entrySet()) {
-//            JSONArray json_detections = new JSONArray();
-//            for (BeaconDetection detection : (Vector<BeaconDetection>) device.getValue()) {
-//                json_detections.put(detection.toJSONObject());
-//            }
-//            JSONObject json_device_entry = new JSONObject();
-//            json_device_entry.put("id", (String) device.getKey());
-//            json_device_entry.put("history", json_detections);
-//            devices.put(json_device_entry);
-//        }
+        JSONArray jsonDevices = new JSONArray();
+        JSONArray jsonDetections = new JSONArray();
+
+        for (DeviceMetadata device : dao.loadAllDeviceMetadata()) {
+            jsonDevices.put(device.toJSONObject());
+            for (BeaconDetection detection : dao.getDetectionsForDevice(device.bluetoothAddress)) {
+                jsonDetections.put(detection.toJSONObject());
+            }
+        }
+
         JSONObject root_object = new JSONObject();
-//        root_object.put("devices", devices);
+        root_object.put("devices", jsonDevices);
+        root_object.put("detections", jsonDetections);
         return root_object;
     }
 
