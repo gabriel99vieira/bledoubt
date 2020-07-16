@@ -15,6 +15,9 @@ import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -30,6 +33,7 @@ import androidx.annotation.NonNull;
 
 public class InspectDeviceActivity extends Activity {
     public static final String BLUETOOTH_ADDRESS_MESSAGE = "hawk.privacy.bledoubt.bluetooth_address";
+    public static final int MAP_CAMERA_DEFAULT_PADDING = 100;
     private MapView mapView;
 
     @Override
@@ -57,7 +61,7 @@ public class InspectDeviceActivity extends Activity {
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onMapReady(@NonNull MapboxMap mapboxMap) {
+            public void onMapReady(@NonNull final MapboxMap mapboxMap) {
                 mapboxMap.setStyle(Style.MAPBOX_STREETS, new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
@@ -77,6 +81,14 @@ public class InspectDeviceActivity extends Activity {
                         ));
                     }
                 });
+
+                // Set the camera to something amicable to the user.
+                LatLngBounds.Builder latLngBoundsBuilder = new LatLngBounds.Builder();
+                for (BeaconDetection detection : traj) {
+                    latLngBoundsBuilder.include(new LatLng(detection.latitude, detection.longitude));
+                }
+                LatLngBounds bounds = latLngBoundsBuilder.build();
+                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, MAP_CAMERA_DEFAULT_PADDING));
             }
         });
 
