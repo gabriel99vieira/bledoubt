@@ -35,6 +35,9 @@ public class DeviceMetadata {
     @ColumnInfo(name = "parser_id")
     public String parserId;
 
+    @ColumnInfo(name = "is_safe")
+    public boolean isSafe;
+
 
 
     public DeviceMetadata (Beacon beacon, BeaconType type) {
@@ -46,10 +49,11 @@ public class DeviceMetadata {
         id3 = beacon.getId3().toHexString();
         manufacturer = beacon.getManufacturer();
         parserId = beacon.getParserIdentifier();
+        isSafe=false;
     }
 
     public DeviceMetadata(@NonNull String bluetoothAddress, String name, int typeCode, String id1,
-                          String id2, String id3, int manufacturer, String parserId) {
+                          String id2, String id3, int manufacturer, String parserId, boolean isSafe) {
         this.bluetoothAddress = bluetoothAddress;
         this.name = name;
         this.typeCode = typeCode;
@@ -58,6 +62,7 @@ public class DeviceMetadata {
         this.id3 = id3;
         this.manufacturer = manufacturer;
         this.parserId = parserId;
+        this.isSafe = isSafe;
     }
 
     public DeviceMetadata(DeviceMetadata other) {
@@ -69,6 +74,7 @@ public class DeviceMetadata {
         id3 = other.id3;
         manufacturer = other.manufacturer;
         parserId = other.parserId;
+        isSafe = other.isSafe;
     }
 
     private static String generateIdentifier(Beacon beacon, BeaconType type) {
@@ -93,6 +99,7 @@ public class DeviceMetadata {
             result.put("id3", id3);
             result.put("manufacturer", manufacturer);
             result.put("parserId", parserId);
+            result.put("isSafe", isSafe);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

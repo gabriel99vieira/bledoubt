@@ -42,22 +42,30 @@ public class Notifications {
         }
     }
 
+    /**
+     * Creates a notification warning the user of a suspicious device.
+     * @param context
+     * @param deviceMetadata corresponding to the suspicious device
+     */
     public void CreateSuspiciousDeviceNotification(Context context, DeviceMetadata deviceMetadata) {
-        Intent startExamineDeviceActivityIntent = new Intent(context, InspectDeviceActivity.class);
-        //startExamineDeviceActivityIntent.putExtra(ExamineDeviceActivity.)
-        startExamineDeviceActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startExamineDeviceActivityIntent, 0);
+        // Create intent to open InspectDeviceActivity
+        Intent startInspectDeviceActivityIntent = new Intent(context, InspectDeviceActivity.class);
+        startInspectDeviceActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startInspectDeviceActivityIntent.putExtra(InspectDeviceActivity.BLUETOOTH_ADDRESS_MESSAGE, deviceMetadata.bluetoothAddress);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startInspectDeviceActivityIntent, 0);
 
+        // Build notification.
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                 .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
                 .setContentTitle(context.getString(R.string.suspicious_notification_title))
                 .setContentText( context.getString(R.string.suspicious_notification_text))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-
+                .setAutoCancel(true)
+                .addAction(R.mipmap.ic_launcher, context.getString(R.string.suspicious_notification_accept), pendingIntent);
         Notification note = builder.build();
         NotificationManagerCompat.from(context).notify(next_notification_id, note);
+
+        // Keep track of active notifications.
         next_notification_id += 1;
     }
 

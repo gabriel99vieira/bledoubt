@@ -160,9 +160,11 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (recyclerViewAdapter.models == null || recyclerViewAdapter.models.size() == 0)
+                    return;
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                notifications.CreateSuspiciousDeviceNotification(context, null);
+                notifications.CreateSuspiciousDeviceNotification(context, recyclerViewAdapter.models.get(0));
             }
         });
 

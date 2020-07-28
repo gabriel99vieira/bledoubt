@@ -13,7 +13,8 @@
     <string name="notification_channel_name">Suspicious device notifications</string>
     <string name="notification_channel_desc">BLE-Doubt will notify you when a potential tracker is detected.</string>
     <string name="suspicious_notification_title">Suspicious device found</string>
-    <string name="suspicious_notification_text">Suspicious device found</string>
+    <string name="suspicious_notification_text">We\'ve noticed a device that follows you around. Let\'s check it out together.</string>
+    <string name="suspicious_notification_accept">Check it out.</string>
     <string name="radar_switch_label">Scan for BLE trackers</string>
 
     <!-- Permissions Dialog -->
