@@ -16,7 +16,14 @@ import androidx.core.app.NotificationManagerCompat;
 
 public class Notifications {
     public static final String DEFAULT_CHANNEL_ID = "default_channel";
+    private static Notifications instance;
 
+    public static Notifications getInstance() {
+        if (instance == null) {
+            instance = new Notifications();
+        }
+        return  instance;
+    }
 
 
     private int next_notification_id = 0;
@@ -56,12 +63,12 @@ public class Notifications {
 
         // Build notification.
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
-                .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
+                .setSmallIcon(R.mipmap.doubter_launcher0)
                 .setContentTitle(context.getString(R.string.suspicious_notification_title))
                 .setContentText( context.getString(R.string.suspicious_notification_text))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
-                .addAction(R.mipmap.ic_launcher, context.getString(R.string.suspicious_notification_accept), pendingIntent);
+                .addAction(R.mipmap.doubter_launcher0, context.getString(R.string.suspicious_notification_accept), pendingIntent);
         Notification note = builder.build();
         NotificationManagerCompat.from(context).notify(next_notification_id, note);
 

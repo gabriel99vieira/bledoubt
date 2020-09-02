@@ -4,11 +4,13 @@ BLE-Doubt is an Android app that helps you find Bluetooth-low-energy (BLE) track
 
 # Tasks
 
-- [ ] Add real-time permissions for BLE .
+- [X] Add real-time permissions for BLE.
+- [X] Create a background processing thread for trajectory analysis.
+- [ ] Persistent notification for accurate scanning?
 - [ ] Add packet parser for Tile devices.
 - [ ] Create new constructor to load BeaconHistory from JSON.
 - [X] Create copy constructor for BeaconHistory.
-- [ ] Create a notification for suspicious devices.
+- [X] Create a notification for suspicious devices.
 - [ ] Implement OUI lookup.
 - [ ] Mark devices as safe.
 - [ ] Protect from public transit false alarms.

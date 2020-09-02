@@ -39,13 +39,20 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.Permission;
+import java.time.Duration;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 public class RadarActivity extends Activity implements BeaconConsumer {
     public static final String ALTBEACON_LAYOUT = "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25";
@@ -56,13 +63,15 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     private static final int SAVE_TO_JSON_REQUEST_CODE = 1;
     private static final int LOCATION_PERMISSIONS_REQUEST = 2;
 
+
     protected static final String TAG = "[RadarActivity]";
     private BeaconManager beaconManager;
     private BeaconHistory beaconHistory;
     private LocationTracker locationTracker;
     private DeviceMainMenuViewAdapter recyclerViewAdapter;
-    private Notifications notifications;
     private Context context;
+    private WorkRequest analyzeTrajectoryRequest;
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -96,12 +105,18 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             beaconManager = BeaconManager.getInstanceForApplication(this);
             beaconManager.getBeaconParsers().add(new BeaconParser(BeaconType.IBEACON.toString()).setBeaconLayout(IBEACON_LAYOUT));
             beaconManager.bind(this);
-
         }
         if (locationTracker == null) {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             locationTracker = new LocationTracker(locationManager);
         }
+
+        WorkRequest analyzeTrajectoryRequest = new PeriodicWorkRequest.Builder(
+                HistoryAnalyzer.class, 15, TimeUnit.MINUTES)
+                .addTag(HistoryAnalyzer.TAG)
+                .build();
+
+        WorkManager.getInstance(this).enqueue(analyzeTrajectoryRequest);
     }
 
     /**
@@ -113,6 +128,8 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             beaconManager = null;
         }
         locationTracker = null;
+
+        WorkManager.getInstance(context).cancelAllWorkByTag(HistoryAnalyzer.TAG);
     }
 
     /**
@@ -164,7 +181,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
                     return;
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                notifications.CreateSuspiciousDeviceNotification(context, recyclerViewAdapter.models.get(0));
+                Notifications.getInstance().CreateSuspiciousDeviceNotification(context, recyclerViewAdapter.models.get(0));
             }
         });
 
@@ -214,7 +231,6 @@ public class RadarActivity extends Activity implements BeaconConsumer {
 
         getLocationPermissions();
 
-        notifications = new Notifications();
         Notifications.createNotificationChannel(context);
 
         initUI();
