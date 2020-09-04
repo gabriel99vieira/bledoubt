@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
@@ -62,7 +63,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     public static final String IBEACON_LAYOUT =  "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
     private static final int SAVE_TO_JSON_REQUEST_CODE = 1;
     private static final int LOCATION_PERMISSIONS_REQUEST = 2;
-
+    private static final String BG_WORK_NAME = "TrajectoryAnalysisWork";
 
     protected static final String TAG = "[RadarActivity]";
     private BeaconManager beaconManager;
@@ -111,12 +112,12 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             locationTracker = new LocationTracker(locationManager);
         }
 
-        WorkRequest analyzeTrajectoryRequest = new PeriodicWorkRequest.Builder(
+        PeriodicWorkRequest analyzeTrajectoryRequest = new PeriodicWorkRequest.Builder(
                 HistoryAnalyzer.class, 15, TimeUnit.MINUTES)
                 .addTag(HistoryAnalyzer.TAG)
                 .build();
 
-        WorkManager.getInstance(this).enqueue(analyzeTrajectoryRequest);
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(BG_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, analyzeTrajectoryRequest);
     }
 
     /**
@@ -129,7 +130,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         }
         locationTracker = null;
 
-        WorkManager.getInstance(context).cancelAllWorkByTag(HistoryAnalyzer.TAG);
+        WorkManager.getInstance(context).cancelUniqueWork(BG_WORK_NAME);
     }
 
     /**
