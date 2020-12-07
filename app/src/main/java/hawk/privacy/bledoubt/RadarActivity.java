@@ -105,6 +105,8 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         if (beaconManager == null) {
             beaconManager = BeaconManager.getInstanceForApplication(this);
             beaconManager.getBeaconParsers().add(new BeaconParser(BeaconType.IBEACON.toString()).setBeaconLayout(IBEACON_LAYOUT));
+            BeaconParser p = new ServiceUuidBeaconParser(0xFEED);
+            beaconManager.getBeaconParsers().add(p);
             beaconManager.bind(this);
         }
         if (locationTracker == null) {
