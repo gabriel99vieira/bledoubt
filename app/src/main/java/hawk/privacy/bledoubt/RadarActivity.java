@@ -3,6 +3,7 @@ package hawk.privacy.bledoubt;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
 
@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -34,14 +33,9 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.Permission;
-import java.time.Duration;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -61,6 +55,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     public static final String EDDYSTONE_UID_LAYOUT =  "s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19";
     public static final String EDDYSTONE_URL_LAYOUT =  "s:0-1=feaa,m:2-2=10,p:3-3:-41,i:4-20v";
     public static final String IBEACON_LAYOUT =  "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
+
     private static final int SAVE_TO_JSON_REQUEST_CODE = 1;
     private static final int LOCATION_PERMISSIONS_REQUEST = 2;
     private static final String BG_WORK_NAME = "TrajectoryAnalysisWork";
@@ -107,6 +102,11 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             beaconManager.getBeaconParsers().add(new BeaconParser(BeaconType.IBEACON.toString()).setBeaconLayout(IBEACON_LAYOUT));
             BeaconParser p = new ServiceUuidBeaconParser(0xFEED);
             beaconManager.getBeaconParsers().add(p);
+            Notification persistentNotification = Notifications.getForegroundScanningNotification(this);
+            beaconManager.enableForegroundServiceScanning(persistentNotification, Notifications.FOREGROUND_NOTIFICATION_ID);
+            beaconManager.setEnableScheduledScanJobs(false);
+            beaconManager.setBackgroundBetweenScanPeriod(0);
+            beaconManager.setBackgroundScanPeriod(1100);
             beaconManager.bind(this);
         }
         if (locationTracker == null) {
@@ -184,7 +184,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
                     return;
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                Notifications.getInstance().CreateSuspiciousDeviceNotification(context, recyclerViewAdapter.models.get(0));
+                Notifications.getInstance().createSuspiciousDeviceNotification(context, recyclerViewAdapter.models.get(0));
             }
         });
 
@@ -234,7 +234,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
 
         getLocationPermissions();
 
-        Notifications.createNotificationChannel(context);
+        Notifications.createNotificationChannels(context);
 
         initUI();
     }
@@ -292,18 +292,12 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     }
 
     protected void storeBeacon(Beacon beacon) {
-        if (locationTracker != null) {
+        if (locationTracker != null && beaconManager != null) {
             Log.i(TAG, "Parser " + beacon.getParserIdentifier() + ". Mac " + beacon.getBluetoothAddress());
             Location loc = locationTracker.getLastLocation();
             if (loc != null) {
                 beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(beacon, new Date(), loc));
             }
-        }
-    }
-
-    private void RequestLocationManager() {
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
         }
     }
 

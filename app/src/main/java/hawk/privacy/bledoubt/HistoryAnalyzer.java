@@ -1,14 +1,9 @@
 package hawk.privacy.bledoubt;
 
-import android.app.Notification;
 import android.content.Context;
 import android.util.Log;
 
-import org.altbeacon.beacon.Beacon;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -78,7 +73,7 @@ public class HistoryAnalyzer extends Worker {
         BeaconHistory history = BeaconHistory.getAppBeaconHistory(context);
         List<DeviceMetadata> devices =  history.getDeviceList();
         if (!devices.isEmpty())
-            Notifications.getInstance().CreateSuspiciousDeviceNotification(context, devices.get(0));
+            Notifications.getInstance().createSuspiciousDeviceNotification(context, devices.get(0));
         return Result.success();
     }
 
