@@ -4,12 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
@@ -47,7 +46,7 @@ public class InspectDeviceActivity extends Activity {
         setActionBar(toolbar);
 
         Intent intent = getIntent();
-        String bluetoothAddress = intent.getStringExtra(BLUETOOTH_ADDRESS_MESSAGE);
+        final String bluetoothAddress = intent.getStringExtra(BLUETOOTH_ADDRESS_MESSAGE);
 
         // Capture the layout's TextView and set the string as its text
         TextView textView = findViewById(R.id.inspect_layout_title);
@@ -89,6 +88,15 @@ public class InspectDeviceActivity extends Activity {
                 }
                 LatLngBounds bounds = latLngBoundsBuilder.build();
                 mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, MAP_CAMERA_DEFAULT_PADDING));
+            }
+        });
+
+        // Allow to mark device as safe
+        CheckBox safeCheckbox = findViewById(R.id.safeCheckBox);
+        safeCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                BeaconHistory.getAppBeaconHistory(getApplicationContext()).markSafe(bluetoothAddress, isChecked);
             }
         });
 

@@ -1,5 +1,6 @@
 package hawk.privacy.bledoubt;
 
+import android.bluetooth.BluetoothClass;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -19,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +84,24 @@ public class BeaconHistory {
 
     public synchronized List<LiveData<DeviceMetadata>> getLiveDeviceList() {
         return null;//return Arrays.asList(dao.loadAllDeviceMetadata());
+    }
+
+    public synchronized boolean isSafe(String bluetoothAddress) {
+        DeviceMetadata[] data = dao.loadMetadataForDevice(Collections.singletonList(bluetoothAddress));
+        if (data.length != 0)
+            return data[0].isSafe;
+        return false;
+    }
+
+    public synchronized boolean markSafe(String bluetoothAddress, boolean isSafe) {
+        DeviceMetadata[] data = dao.loadMetadataForDevice(Collections.singletonList(bluetoothAddress));
+        if (data.length == 0) {
+            return false;
+        }
+        DeviceMetadata metadata = data[0];
+        metadata.isSafe = isSafe;
+        dao.updateMetadata(metadata);
+        return true;
     }
 
     /**

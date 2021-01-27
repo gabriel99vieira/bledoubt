@@ -7,14 +7,20 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 @Dao
 public interface HistoryDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertMetadata(DeviceMetadata... metadata);
+
+    @Update
+    void updateMetadata(DeviceMetadata... metadata);
 
     @Delete
     void deleteMetadata(DeviceMetadata... metadata);
+
+
 
     @Query("SELECT * FROM DeviceMetadata")
     DeviceMetadata[] loadAllDeviceMetadata();
@@ -41,4 +47,5 @@ public interface HistoryDao {
 
     @Query("DELETE FROM BeaconDetection")
     public void nukeBeaconDetections();
+
 }
