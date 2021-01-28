@@ -44,6 +44,7 @@ public class DeviceMetadata {
         bluetoothAddress = beacon.getBluetoothAddress();
         name = beacon.getBluetoothName();
         typeCode = beacon.getBeaconTypeCode();
+
         id1 = beacon.getId1().toHexString();
         id2 = beacon.getId2().toHexString();
         id3 = beacon.getId3().toHexString();

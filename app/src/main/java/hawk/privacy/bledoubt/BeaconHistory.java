@@ -164,6 +164,13 @@ public class BeaconHistory {
         return root_object;
     }
 
+    /**
+     * Construct database from JSON object
+     */
+    public synchronized void loadFromJSON() throws JSONException {
+
+    }
+
 }
 
 @Database(entities = {DeviceMetadata.class, BeaconDetection.class}, version = 1)

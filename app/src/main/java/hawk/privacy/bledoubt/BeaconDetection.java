@@ -29,34 +29,31 @@ public class BeaconDetection {
     @NonNull
     @TypeConverters(TimestampConverter.class)
     public Date timestamp;
-
     public double latitude;
     public double longitude;
-    public double distanceEstimate;
-
-
+    public double rssi;
 
     public BeaconDetection(String bluetoothAddress, Date timestamp, double latitude,
-                           double longitude, double distanceEstimate) {
+                           double longitude, double rssi) {
         this.bluetoothAddress = bluetoothAddress;
         this.timestamp = timestamp;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.distanceEstimate = distanceEstimate;
+        this.rssi = rssi;
     }
 
     public BeaconDetection(Beacon beacon, Date timestamp, Location location) {
-        this(beacon.getBluetoothAddress(), timestamp, location, beacon.getDistance());
+        this(beacon.getBluetoothAddress(), timestamp, location, beacon.getRssi());
     }
 
-    public BeaconDetection(String bluetoothAddress, Date timestamp, Location location, double distance) {
+    public BeaconDetection(String bluetoothAddress, Date timestamp, Location location, double rssi) {
         this(bluetoothAddress, timestamp, location.getLatitude(),
-                location.getLongitude(), distance);
+                location.getLongitude(), rssi);
     }
 
     public BeaconDetection(BeaconDetection other) {
         this(other.bluetoothAddress, other.timestamp, other.latitude,
-                other.longitude, other.distanceEstimate);
+                other.longitude, other.rssi);
     }
 
     public JSONObject toJSONObject() {
@@ -65,7 +62,7 @@ public class BeaconDetection {
             result.put("t", timestamp);
             result.put("lat", latitude);
             result.put("long", longitude);
-            result.put("d", distanceEstimate);
+            result.put("rssi", rssi);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

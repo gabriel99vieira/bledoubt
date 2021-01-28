@@ -145,10 +145,11 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             out.write(beaconHistory.toJSONObject().toString().getBytes());
         } catch (IOException | JSONException e) {
             success = false;
-            Toast.makeText(context, getString(R.string.save_to_json_toast, output_json_uri), Toast.LENGTH_LONG);
         }
         if (success) {
             Toast.makeText(context, getString(R.string.failed_json_save_toast, output_json_uri), Toast.LENGTH_LONG);
+        } else {
+            Toast.makeText(context, getString(R.string.save_to_json_toast, output_json_uri), Toast.LENGTH_LONG);
         }
     }
 
