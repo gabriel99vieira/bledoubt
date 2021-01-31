@@ -13,6 +13,7 @@ BLE-Doubt is an Android app that helps you find Bluetooth-low-energy (BLE) track
 - [X] Create a notification for suspicious devices.
 - [ ] Implement OUI lookup.
 - [X] Mark devices as safe.
+- [ ] Add reminder to turn on bluetooth / location if necessary.
 - [ ] Generic list view for collections of devices. e,g, safe, suspicious, nearby
 - [ ] Lookup/list nearby devices
 - [ ] List safe devices / remove safe devices from safe list

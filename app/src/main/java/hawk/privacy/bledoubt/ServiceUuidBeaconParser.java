@@ -24,13 +24,8 @@ public class ServiceUuidBeaconParser extends BeaconParser {
         this.serviceUuid = serviceUuid;
     }
 
-
-
-
     @Override
     public Beacon fromScanData(byte[] bytesToProcess, int rssi, BluetoothDevice device, long timestampMs) {
-
-        Log.i(TAG, "From scan data.");
         if (bytesToProcess == null)
             return null;
 
@@ -48,15 +43,15 @@ public class ServiceUuidBeaconParser extends BeaconParser {
             switch (packet.type) {
                 case COMPLETE_SERVICE_ID_16_BIT_TYPE:
                     builder.setServiceUuid(bytesToInt(packet.data));
-                    Log.i(TAG, String.format("UUID %x", bytesToInt(packet.data)));
+                    //Log.i(TAG, String.format("UUID %x", bytesToInt(packet.data)));
                 default:
                     continue;
             }
         }
         Beacon beacon = builder.build();
-        Log.i(TAG, String.format("Built %x -- expected %x", beacon.getServiceUuid(), this.serviceUuid));
+        //Log.i(TAG, String.format("Built %x -- expected %x", beacon.getServiceUuid(), this.serviceUuid));
         if (beacon.getServiceUuid() == this.serviceUuid) {
-            Log.i(TAG, "BLAM");
+            //Log.i(TAG, "BLAM");
             return beacon;
         }
         return null;
@@ -111,13 +106,13 @@ public class ServiceUuidBeaconParser extends BeaconParser {
         if (bytes.length > bytesPerInt)
             throw new InvalidParameterException("Too many bytes to convert to int.");
         int result = 0;
-        Log.i(TAG, String.format("Zero: %x", result));
+        //Log.i(TAG, String.format("Zero: %x", result));
         for (int i = 0; i < bytes.length; i++) {
-            Log.i(TAG, String.format("Part %d: %x", i, bytes[i]));
+            //Log.i(TAG, String.format("Part %d: %x", i, bytes[i]));
 
-            Log.i(TAG, String.format("Part %d: %x", i, bytes[i]));
+            //Log.i(TAG, String.format("Part %d: %x", i, bytes[i]));
             result += (((int) bytes[i]) << (2*4*i)) & (0xff <<(2*4*i));
-            Log.i(TAG, String.format("%d: %x", i,  result));
+            //Log.i(TAG, String.format("%d: %x", i,  result));
         }
         return result;
     }

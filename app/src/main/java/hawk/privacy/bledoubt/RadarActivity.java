@@ -65,6 +65,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     private BeaconHistory beaconHistory;
     private LocationTracker locationTracker;
     private DeviceMainMenuViewAdapter recyclerViewAdapter;
+    private OuiLookupTable ouiLookup;
     private Context context;
     private WorkRequest analyzeTrajectoryRequest;
 
@@ -232,6 +233,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         super.onCreate(savedInstanceState);
         beaconHistory = BeaconHistory.getAppBeaconHistory(this);
         context = getApplicationContext();
+        ouiLookup = new OuiLookupTable(this);
 
         getLocationPermissions();
 
@@ -296,6 +298,9 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         if (locationTracker != null && beaconManager != null) {
             Log.i(TAG, "Parser " + beacon.getParserIdentifier() + ". Mac " + beacon.getBluetoothAddress());
             Location loc = locationTracker.getLastLocation();
+            String oui = ouiLookup.lookupOui(beacon.getBluetoothAddress());
+            //String oui = ouiLookup.lookupOui("00:00:3D:00:11:22");;
+            Log.i(TAG, "OUI " + oui);
             if (loc != null) {
                 beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(beacon, new Date(), loc));
             }

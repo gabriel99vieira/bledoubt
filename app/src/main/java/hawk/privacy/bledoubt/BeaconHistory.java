@@ -3,13 +3,17 @@ package hawk.privacy.bledoubt;
 import android.bluetooth.BluetoothClass;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.location.Location;
 import android.net.Uri;
 import android.nfc.Tag;
 import android.os.Environment;
+import android.util.JsonReader;
 import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
+
+import com.google.gson.JsonObject;
 
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -32,6 +36,8 @@ import org.altbeacon.beacon.service.DetectionTracker;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Database;
@@ -60,6 +66,7 @@ public class BeaconHistory {
         this.dao = db.historyDao();
     }
 
+
     /**
      * TODO: Figure out if this actually wants to be a singleton. May want inheritance
      * so that we're not locked into static database lookups.
@@ -86,6 +93,11 @@ public class BeaconHistory {
         return null;//return Arrays.asList(dao.loadAllDeviceMetadata());
     }
 
+    /**
+     * Look up whether or not the user has recorded this device as safe
+     * @param bluetoothAddress
+     * @return isSafe
+     */
     public synchronized boolean isSafe(String bluetoothAddress) {
         DeviceMetadata[] data = dao.loadMetadataForDevice(Collections.singletonList(bluetoothAddress));
         if (data.length != 0)
@@ -93,6 +105,12 @@ public class BeaconHistory {
         return false;
     }
 
+    /**
+     * Record whether or not the user believes a particular device is safe.
+     * @param bluetoothAddress the BLE address of the device
+     * @param isSafe true if the device is safe and false otherwise.
+     * @return success
+     */
     public synchronized boolean markSafe(String bluetoothAddress, boolean isSafe) {
         DeviceMetadata[] data = dao.loadMetadataForDevice(Collections.singletonList(bluetoothAddress));
         if (data.length == 0) {
@@ -124,6 +142,7 @@ public class BeaconHistory {
     public synchronized Trajectory getTrajectory(String mac) {
         return new Trajectory(Arrays.asList(dao.getDetectionsForDevice(mac)));
     }
+
 
     /**
      * Remove all devices and detection events from the history.
