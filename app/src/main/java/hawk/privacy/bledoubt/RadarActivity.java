@@ -300,6 +300,8 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             Location loc = locationTracker.getLastLocation();
             String oui = ouiLookup.lookupOui(beacon.getBluetoothAddress());
             //String oui = ouiLookup.lookupOui("00:00:3D:00:11:22");;
+            //Log.i(TAG, "OUI " + ouiLookup.lookupOui("00:50:C2:00:11:21"));
+            //Log.i(TAG, "OUI " + ouiLookup.lookupOui("00:50:C2"));
             Log.i(TAG, "OUI " + oui);
             if (loc != null) {
                 beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(beacon, new Date(), loc));

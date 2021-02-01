@@ -11,7 +11,7 @@ BLE-Doubt is an Android app that helps you find Bluetooth-low-energy (BLE) track
 - [ ] Create new constructor to load BeaconHistory from JSON.
 - [X] Create copy constructor for BeaconHistory.
 - [X] Create a notification for suspicious devices.
-- [ ] Implement OUI lookup.
+- [X] Implement OUI lookup.
 - [X] Mark devices as safe.
 - [ ] Add reminder to turn on bluetooth / location if necessary.
 - [ ] Generic list view for collections of devices. e,g, safe, suspicious, nearby
@@ -39,7 +39,7 @@ of searching for the device by using your phone as a proximity sensor. BLE-Doubt
 
 If you knowingly carry a Bluetooth connected device around with you, like a Tile tracker or a pair of BLE headphones, BLE-Doubt will probably flag them as suspicious the first time you travel with them. You can mark these devices as "safe" if you recognize them and believe they are harmless. BLE-doubt will ignore safe devices until you specify otherwise from the Options menu.
 
-Additionally, taking public transit may put you in contact with many Bluetooth devices which are not trackers -- namely the devices owned by other people on your train or bus. BLE-Doubt minimizes the risk of notifying you of these devices by [[[still unknown]]].
+Additionally, taking public transit may put you in contact with many Bluetooth devices which are not trackers -- namely the devices owned by other people on your train or bus.
 
 ## Detecting devices in "privacy mode"
 
