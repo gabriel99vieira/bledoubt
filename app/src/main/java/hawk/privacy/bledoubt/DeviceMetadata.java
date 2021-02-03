@@ -1,5 +1,7 @@
 package hawk.privacy.bledoubt;
 
+import android.bluetooth.BluetoothClass;
+
 import org.altbeacon.beacon.Beacon;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,6 +103,26 @@ public class DeviceMetadata {
             result.put("manufacturer", manufacturer);
             result.put("parserId", parserId);
             result.put("isSafe", isSafe);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    public static DeviceMetadata fromJSONObject(JSONObject obj) {
+        DeviceMetadata result;
+        try {
+            result = new DeviceMetadata(
+                    obj.getString("address"),
+                    obj.getString("name"),
+                    obj.getInt("type"),
+                    obj.getString("id1"),
+                    obj.getString("id2"),
+                    obj.getString("id3"),
+                    obj.getInt("manufacturer"),
+                    obj.getString("parserId"),
+                    obj.getBoolean("isSafe")
+            );
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

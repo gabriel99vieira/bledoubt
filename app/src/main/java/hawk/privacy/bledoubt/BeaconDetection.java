@@ -59,10 +59,29 @@ public class BeaconDetection {
     public JSONObject toJSONObject() {
         JSONObject result = new JSONObject();
         try {
+            result.put("mac", bluetoothAddress);
             result.put("t", timestamp);
             result.put("lat", latitude);
             result.put("long", longitude);
             result.put("rssi", rssi);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    public static BeaconDetection fromJSONObject(JSONObject obj) {
+        BeaconDetection result;
+        Location loc = new Location("Json");
+        try {
+            loc.setLatitude(obj.getDouble("lat"));
+            loc.setLongitude(obj.getDouble("long"));
+            result = new BeaconDetection (
+                obj.getString("mac"),
+                TimestampConverter.fromTimestamp(obj.getString("t")),
+                loc,
+                obj.getDouble("rssi")
+            );
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

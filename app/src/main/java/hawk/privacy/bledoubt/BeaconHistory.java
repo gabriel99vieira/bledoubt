@@ -184,10 +184,25 @@ public class BeaconHistory {
     }
 
     /**
-     * Construct database from JSON object
+     * Construct database from JSON object. Destroys current contents of database if they exist.
      */
-    public synchronized void loadFromJSON() throws JSONException {
+    public synchronized void loadJSON(JSONObject object) throws JSONException {
+        dao.nukeDeviceMetadata();
+        dao.nukeBeaconDetections();
 
+        JSONArray jsonMetadata = object.getJSONArray("devices");
+        DeviceMetadata[] metadata = new DeviceMetadata[jsonMetadata.length()];
+        for (int i = 0; i < jsonMetadata.length(); i++) {
+            metadata[i] = DeviceMetadata.fromJSONObject(jsonMetadata.getJSONObject(i));
+        }
+        dao.insertMetadata(metadata);
+
+        JSONArray jsonDetections = object.getJSONArray("detections");
+        BeaconDetection[] detections = new BeaconDetection[jsonDetections.length()];
+        for (int i = 0; i < jsonDetections.length(); i++) {
+            detections[i] = BeaconDetection.fromJSONObject(jsonDetections.getJSONObject(i));
+        }
+        dao.insertDetections(detections);
     }
 
 }
