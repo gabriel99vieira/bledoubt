@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,6 +43,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -57,7 +59,8 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     public static final String IBEACON_LAYOUT =  "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
 
     private static final int SAVE_TO_JSON_REQUEST_CODE = 1;
-    private static final int LOCATION_PERMISSIONS_REQUEST = 2;
+    private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 2;
+    private static final int ENABLE_BLUETOOTH_REQUEST_CODE = 3;
     private static final String BG_WORK_NAME = "TrajectoryAnalysisWork";
 
     protected static final String TAG = "[RadarActivity]";
@@ -68,6 +71,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     private OuiLookupTable ouiLookup;
     private Context context;
     private WorkRequest analyzeTrajectoryRequest;
+    private BluetoothAdapter bluetoothAdapter;
 
 
     @Override
@@ -77,27 +81,40 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             case SAVE_TO_JSON_REQUEST_CODE:
                 saveToJsonActivityResult(data.getData());
                 break;
+            case ENABLE_BLUETOOTH_REQUEST_CODE:
+                if (resultCode == Activity.RESULT_OK)
+                    activateRadar();
+                else {
+                    deactivateRadar();
+                }
+                break;
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
-            case LOCATION_PERMISSIONS_REQUEST:
+            case LOCATION_PERMISSIONS_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     activateRadar();
                 } else {
                     deactivateRadar();
                 }
-                return;
         }
     }
+
 
     /**
      * Enable the BLE scanner and location tracker, collecting data to detect devices.
      */
     private void activateRadar() {
         Log.i(TAG, "Activating Radar");
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, ENABLE_BLUETOOTH_REQUEST_CODE);
+            return;
+        }
+
         if (beaconManager == null) {
             beaconManager = BeaconManager.getInstanceForApplication(this);
             beaconManager.getBeaconParsers().add(new BeaconParser(BeaconType.IBEACON.toString()).setBeaconLayout(IBEACON_LAYOUT));
@@ -231,14 +248,13 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         beaconHistory = BeaconHistory.getAppBeaconHistory(this);
         context = getApplicationContext();
         ouiLookup = new OuiLookupTable(this);
 
         getLocationPermissions();
-
         Notifications.createNotificationChannels(context);
-
         initUI();
     }
 
@@ -259,7 +275,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             if (needsAnyRationale) {
                 showPermissionRationale();
             } else {
-                requestPermissions(permissions, LOCATION_PERMISSIONS_REQUEST);
+                requestPermissions(permissions, LOCATION_PERMISSIONS_REQUEST_CODE);
             }
             return false;
         }
@@ -275,7 +291,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         requestPermissions(new String[]{ Manifest.permission.ACCESS_COARSE_LOCATION,
-                                Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSIONS_REQUEST);
+                                Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSIONS_REQUEST_CODE);
                     }
                 })
                 .setNegativeButton(R.string.permission_rationale_dismiss, new DialogInterface.OnClickListener() {
