@@ -12,6 +12,7 @@
         android:roundIcon="@mipmap/doubter_launcher0_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".MainFragmentActivity"></activity>
         <activity
             android:name=".InspectDeviceActivity"
             android:label="@string/title_activity_inspect_device"

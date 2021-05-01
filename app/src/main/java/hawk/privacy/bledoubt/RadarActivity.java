@@ -44,12 +44,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
+import hawk.privacy.bledoubt.ui.main.RadarViewModel;
 
 public class RadarActivity extends Activity implements BeaconConsumer {
     public static final String ALTBEACON_LAYOUT = "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25";
@@ -73,6 +75,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
     private WorkRequest analyzeTrajectoryRequest;
     private BluetoothAdapter bluetoothAdapter;
 
+    public RadarViewModel radarViewModel;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
