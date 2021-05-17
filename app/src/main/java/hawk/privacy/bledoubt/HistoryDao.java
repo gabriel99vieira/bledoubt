@@ -2,6 +2,7 @@ package hawk.privacy.bledoubt;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -24,6 +25,15 @@ public interface HistoryDao {
 
     @Query("SELECT * FROM DeviceMetadata")
     DeviceMetadata[] loadAllDeviceMetadata();
+
+    @Query("SELECT * FROM DeviceMetadata")
+    LiveData<List<DeviceMetadata>> loadAllDeviceMetadataLive();
+
+    @Query("SELECT * FROM DeviceMetadata WHERE is_suspicious AND NOT is_safe")
+    LiveData<List<DeviceMetadata>> loadSuspiciousDeviceMetadataLive();
+
+    @Query("SELECT * FROM DeviceMetadata WHERE is_suspicious AND NOT is_safe")
+    LiveData<List<DeviceMetadata>> loadSafeDeviceMetadataLive();
 
     @Query("SELECT * FROM DeviceMetadata WHERE bluetoothAddress IN (:bluetoothAddresses)")
     DeviceMetadata[] loadMetadataForDevice(List<String> bluetoothAddresses);

@@ -40,23 +40,25 @@ public class DeviceMetadata {
     @ColumnInfo(name = "is_safe")
     public boolean isSafe;
 
-
+    @ColumnInfo(name = "is_suspicious")
+    public boolean isSuspicious;
 
     public DeviceMetadata (Beacon beacon, BeaconType type) {
         bluetoothAddress = beacon.getBluetoothAddress();
         name = beacon.getBluetoothName();
         typeCode = beacon.getBeaconTypeCode();
-
         id1 = beacon.getId1().toHexString();
         id2 = beacon.getId2().toHexString();
         id3 = beacon.getId3().toHexString();
         manufacturer = beacon.getManufacturer();
         parserId = beacon.getParserIdentifier();
         isSafe=false;
+        isSuspicious=false;
     }
 
     public DeviceMetadata(@NonNull String bluetoothAddress, String name, int typeCode, String id1,
-                          String id2, String id3, int manufacturer, String parserId, boolean isSafe) {
+                          String id2, String id3, int manufacturer, String parserId, boolean isSafe,
+                          boolean isSuspicious) {
         this.bluetoothAddress = bluetoothAddress;
         this.name = name;
         this.typeCode = typeCode;
@@ -66,6 +68,7 @@ public class DeviceMetadata {
         this.manufacturer = manufacturer;
         this.parserId = parserId;
         this.isSafe = isSafe;
+        this.isSuspicious = isSuspicious;
     }
 
     public DeviceMetadata(DeviceMetadata other) {
@@ -78,6 +81,7 @@ public class DeviceMetadata {
         manufacturer = other.manufacturer;
         parserId = other.parserId;
         isSafe = other.isSafe;
+        isSuspicious = other.isSuspicious;
     }
 
     private static String generateIdentifier(Beacon beacon, BeaconType type) {
@@ -103,6 +107,7 @@ public class DeviceMetadata {
             result.put("manufacturer", manufacturer);
             result.put("parserId", parserId);
             result.put("isSafe", isSafe);
+            result.put("isSuspicious", isSuspicious);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -121,7 +126,8 @@ public class DeviceMetadata {
                     obj.getString("id3"),
                     obj.getInt("manufacturer"),
                     obj.getString("parserId"),
-                    obj.getBoolean("isSafe")
+                    obj.getBoolean("isSafe"),
+                    obj.getBoolean("isSuspicious")
             );
         } catch (JSONException e) {
             throw new RuntimeException(e);

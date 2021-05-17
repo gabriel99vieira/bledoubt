@@ -42,8 +42,8 @@ public class InspectDeviceActivity extends Activity {
         Mapbox.getInstance(this, getResources().getString(R.string.mapbox_api_key));
 
         setContentView(R.layout.activity_inspect_device);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setActionBar(toolbar);
+        //Toolbar toolbar = findViewById(R.id.toolbar);
+        //setActionBar(toolbar);
 
         Intent intent = getIntent();
         final String bluetoothAddress = intent.getStringExtra(BLUETOOTH_ADDRESS_MESSAGE);

@@ -89,8 +89,16 @@ public class BeaconHistory {
         return out;
     }
 
-    public synchronized List<LiveData<DeviceMetadata>> getLiveDeviceList() {
-        return null;//return Arrays.asList(dao.loadAllDeviceMetadata());
+    public synchronized LiveData<List<DeviceMetadata>> getLiveDeviceList() {
+        return dao.loadAllDeviceMetadataLive();
+    }
+
+    public synchronized LiveData<List<DeviceMetadata>> getLiveSafeDeviceList() {
+        return dao.loadSafeDeviceMetadataLive();
+    }
+
+    public synchronized LiveData<List<DeviceMetadata>> getLiveSuspiciousDeviceList() {
+        return dao.loadSuspiciousDeviceMetadataLive();
     }
 
     /**

@@ -1,15 +1,20 @@
 package hawk.privacy.bledoubt.ui.main
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class RadarViewModel : ViewModel() {
     // TODO: Implement the ViewModel
-    val isRadarEnabled = MutableLiveData<Boolean>()
+    private val isRadarEnabled = MutableLiveData<Boolean>()
 
-
-    override fun onCleared() {
-        super.onCleared()
-        // Dispose of subscriptions
+    fun getIsRadarEnabled(): LiveData<Boolean> {
+        return isRadarEnabled
     }
+
+    fun setIsRadarEnabled(isEnabled: Boolean) {
+        isRadarEnabled.value = isEnabled
+    }
+
+
 }

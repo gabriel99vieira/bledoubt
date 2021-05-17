@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -16,16 +15,11 @@ import android.os.Bundle;
 import android.os.RemoteException;
 
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
-import android.widget.Toolbar;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -33,46 +27,51 @@ import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
+import hawk.privacy.bledoubt.ui.main.RadarFragment;
 import hawk.privacy.bledoubt.ui.main.RadarViewModel;
 
-public class RadarActivity extends Activity implements BeaconConsumer {
+public class RadarActivity extends AppCompatActivity implements BeaconConsumer, DeviceListFragment.OnListFragmentInteractionListener {
+
+    // Beacon Layouts
     public static final String ALTBEACON_LAYOUT = "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25";
     public static final String EDDYSTONE_TLM_LAYOUT = "x,s:0-1=feaa,m:2-2=20,d:3-3,d:4-5,d:6-7,d:8-11,d:12-15";
     public static final String EDDYSTONE_UID_LAYOUT =  "s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19";
     public static final String EDDYSTONE_URL_LAYOUT =  "s:0-1=feaa,m:2-2=10,p:3-3:-41,i:4-20v";
     public static final String IBEACON_LAYOUT =  "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
 
+    // Request Codes
     private static final int SAVE_TO_JSON_REQUEST_CODE = 1;
     private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 2;
     private static final int ENABLE_BLUETOOTH_REQUEST_CODE = 3;
+
+    // Identifier for background work request.
     private static final String BG_WORK_NAME = "TrajectoryAnalysisWork";
 
     protected static final String TAG = "[RadarActivity]";
+
+    // Data management for finding beacons
     private BeaconManager beaconManager;
     private BeaconHistory beaconHistory;
     private LocationTracker locationTracker;
-    private DeviceMainMenuViewAdapter recyclerViewAdapter;
     private OuiLookupTable ouiLookup;
+
     private Context context;
-    private WorkRequest analyzeTrajectoryRequest;
     private BluetoothAdapter bluetoothAdapter;
 
     public RadarViewModel radarViewModel;
@@ -109,15 +108,37 @@ public class RadarActivity extends Activity implements BeaconConsumer {
 
     /**
      * Enable the BLE scanner and location tracker, collecting data to detect devices.
+     * Also enable a background task that attempts to identify malicious trackers.
      */
     private void activateRadar() {
         Log.i(TAG, "Activating Radar");
+
+        if (requestLocationPermissions() && requestBluetoothEnabled()) {
+            activateBeaconManager();
+            activateLocationTracker();
+
+            PeriodicWorkRequest analyzeTrajectoryRequest = new PeriodicWorkRequest.Builder(
+                    HistoryAnalyzer.class, 15, TimeUnit.MINUTES)
+                    .addTag(HistoryAnalyzer.TAG)
+                    .build();
+            WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                    BG_WORK_NAME,
+                    ExistingPeriodicWorkPolicy.KEEP,
+                    analyzeTrajectoryRequest
+            );
+        }
+    }
+
+    private boolean requestBluetoothEnabled() {
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, ENABLE_BLUETOOTH_REQUEST_CODE);
-            return;
+            return false;
         }
+        return true;
+    }
 
+    private void activateBeaconManager() {
         if (beaconManager == null) {
             beaconManager = BeaconManager.getInstanceForApplication(this);
             beaconManager.getBeaconParsers().add(new BeaconParser(BeaconType.IBEACON.toString()).setBeaconLayout(IBEACON_LAYOUT));
@@ -130,17 +151,53 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             beaconManager.setBackgroundScanPeriod(1100);
             beaconManager.bind(this);
         }
+    }
+
+    private void activateLocationTracker() {
         if (locationTracker == null) {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             locationTracker = new LocationTracker(locationManager);
         }
+    }
 
-        PeriodicWorkRequest analyzeTrajectoryRequest = new PeriodicWorkRequest.Builder(
-                HistoryAnalyzer.class, 15, TimeUnit.MINUTES)
-                .addTag(HistoryAnalyzer.TAG)
-                .build();
+    private boolean requestLocationPermissions() {
+        boolean missingAnyPermission = false;
+        boolean needsAnyRationale = false;
+        String[] permissions = new String[]{ Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION};
+        for (String permission_name : permissions) {
+            if (checkSelfPermission(permission_name) != PackageManager.PERMISSION_GRANTED) {
+                missingAnyPermission = true;
+                if (shouldShowRequestPermissionRationale(permission_name)) {
+                    needsAnyRationale = true;
+                }
+            }
+        }
+        if (missingAnyPermission) {
+            if (needsAnyRationale) {
+                showPermissionRationale();
+            } else {
+                requestPermissions(permissions, LOCATION_PERMISSIONS_REQUEST_CODE);
+            }
+            return false;
+        }
+        return true;
+    }
 
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(BG_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, analyzeTrajectoryRequest);
+    private void showPermissionRationale() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.permission_rationale_title)
+                .setMessage(R.string.permission_rationale_text)
+                .setPositiveButton(R.string.permission_rationale_accept, (dialog, which) ->
+                        requestPermissions(new String[]{
+                                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                                        Manifest.permission.ACCESS_FINE_LOCATION},
+                                LOCATION_PERMISSIONS_REQUEST_CODE
+                        )
+                )
+                .setNegativeButton(R.string.permission_rationale_dismiss, (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
     }
 
     /**
@@ -174,60 +231,14 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         }
     }
 
-    private void initUI() {
-        setContentView(R.layout.activity_radar);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setActionBar(toolbar);
-
-        //final Button radarButton = findViewById(R.id.radar_button);
-
-        final Switch radarSwitch = findViewById(R.id.radar_switch);
-        radarSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    if (getLocationPermissions()) {
-                        activateRadar();
-                    } else {
-                        // Turn off the switch if you don't get permission.
-                        buttonView.setChecked(false);
-                    }
-                } else {
-                    deactivateRadar();
-                }
-            }
-        });
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (recyclerViewAdapter.models == null || recyclerViewAdapter.models.size() == 0)
-                    return;
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                Notifications.getInstance().createSuspiciousDeviceNotification(context, recyclerViewAdapter.models.get(0));
-            }
-        });
-
-        initDeviceList();
-    }
-
-    private void initDeviceList() {
-        List<DeviceMetadata> models = new ArrayList<>();
-        recyclerViewAdapter = new DeviceMainMenuViewAdapter(models, this);
-        RecyclerView recyclerView = findViewById(R.id.main_menu_recyclerview);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(recyclerViewAdapter);
+    private void initToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 
 
-    private void updateRecyclerView() {
-        Log.i(TAG, "Update recyclerview");
-        this.recyclerViewAdapter.setModels(this.beaconHistory.getDeviceList());
-        recyclerViewAdapter.notifyDataSetChanged();
-    }
+
+
 
     @Override
     public void onBeaconServiceConnect() {
@@ -238,7 +249,7 @@ public class RadarActivity extends Activity implements BeaconConsumer {
                 for (Beacon beacon : beacons) {
                     storeBeacon(beacon);
                 }
-                updateRecyclerView();
+                //updateRecyclerView();
             }
         });
         try {
@@ -256,56 +267,29 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         context = getApplicationContext();
         ouiLookup = new OuiLookupTable(this);
 
-        getLocationPermissions();
-        Notifications.createNotificationChannels(context);
-        initUI();
-    }
-
-    private boolean getLocationPermissions() {
-        boolean missingAnyPermission = false;
-        boolean needsAnyRationale = false;
-        String[] permissions = new String[]{ Manifest.permission.ACCESS_COARSE_LOCATION,
-                                           Manifest.permission.ACCESS_FINE_LOCATION};
-        for (String permission_name : permissions) {
-            if (checkSelfPermission(permission_name) != PackageManager.PERMISSION_GRANTED) {
-                missingAnyPermission = true;
-                if (shouldShowRequestPermissionRationale(permission_name)) {
-                    needsAnyRationale = true;
-                }
-            }
-        }
-        if (missingAnyPermission) {
-            if (needsAnyRationale) {
-                showPermissionRationale();
+        radarViewModel = new ViewModelProvider(this).get(RadarViewModel.class);
+        radarViewModel.getIsRadarEnabled().observe(this, isEnabled -> {
+            if (isEnabled) {
+                activateRadar();
             } else {
-                requestPermissions(permissions, LOCATION_PERMISSIONS_REQUEST_CODE);
+                deactivateRadar();
             }
-            return false;
+        });
+
+        requestLocationPermissions();
+        Notifications.createNotificationChannels(context);
+
+        setContentView(R.layout.main_activity);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, RadarFragment.class, null)
+                    .commit();
         }
-        return true;
+
+        initToolbar();
     }
 
-    private void showPermissionRationale() {
-        final RadarActivity activity = this;
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.permission_rationale_title)
-                .setMessage(R.string.permission_rationale_text)
-                .setPositiveButton(R.string.permission_rationale_accept, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        requestPermissions(new String[]{ Manifest.permission.ACCESS_COARSE_LOCATION,
-                                Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSIONS_REQUEST_CODE);
-                    }
-                })
-                .setNegativeButton(R.string.permission_rationale_dismiss, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .create()
-                .show();
-    }
+
 
     @Override
     protected void onDestroy() {
@@ -318,9 +302,6 @@ public class RadarActivity extends Activity implements BeaconConsumer {
             Log.i(TAG, "Parser " + beacon.getParserIdentifier() + ". Mac " + beacon.getBluetoothAddress());
             Location loc = locationTracker.getLastLocation();
             String oui = ouiLookup.lookupOui(beacon.getBluetoothAddress());
-            //String oui = ouiLookup.lookupOui("00:00:3D:00:11:22");;
-            //Log.i(TAG, "OUI " + ouiLookup.lookupOui("00:50:C2:00:11:21"));
-            //Log.i(TAG, "OUI " + ouiLookup.lookupOui("00:50:C2"));
             Log.i(TAG, "OUI " + oui);
             if (loc != null) {
                 beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(beacon, new Date(), loc));
@@ -354,18 +335,8 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.confirm_delete_title)
                 .setMessage(R.string.confirm_delete_text)
-                .setPositiveButton(R.string.confirm_delete_accept, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        activity.beaconHistory.clearAll();
-                    }
-                })
-                .setNegativeButton(R.string.confirm_delete_dismiss, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
+                .setPositiveButton(R.string.confirm_delete_accept, (dialog, which) -> activity.beaconHistory.clearAll())
+                .setNegativeButton(R.string.confirm_delete_dismiss, (dialog, which) -> dialog.dismiss())
                 .create()
                 .show();
     }
@@ -378,5 +349,10 @@ public class RadarActivity extends Activity implements BeaconConsumer {
         String suggestedName = "log.json";
         intent.putExtra(Intent.EXTRA_TITLE, suggestedName);
         startActivityForResult(intent, SAVE_TO_JSON_REQUEST_CODE);
+    }
+
+    @Override
+    public void onListFragmentInteraction(@Nullable DeviceMetadata item) {
+        Toast.makeText(context, "Clicked item " + item.name, Toast.LENGTH_LONG);
     }
 }

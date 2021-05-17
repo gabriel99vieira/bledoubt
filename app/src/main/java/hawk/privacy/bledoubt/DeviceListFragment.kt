@@ -2,6 +2,7 @@ package hawk.privacy.bledoubt
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,17 +37,21 @@ class DeviceListFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_device_list_list, container, false)
+        val devices = BeaconHistory.getAppBeaconHistory(requireActivity()).liveDeviceList
 
         // Set the adapter
+        val deviceAdapter = DeviceRecyclerViewAdapter(ArrayList(), context)
+        Log.d("Dvices", devices.value.toString())
         if (view is RecyclerView) {
             with(view) {
                 layoutManager = when {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                adapter = MyDeviceRecyclerViewAdapter(DummyContent.ITEMS, listener)
+                adapter = deviceAdapter
             }
         }
+        devices.observe(viewLifecycleOwner, deviceAdapter)
         return view
     }
 
@@ -77,7 +82,7 @@ class DeviceListFragment : Fragment() {
      */
     interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onListFragmentInteraction(item: DummyItem?)
+        fun onListFragmentInteraction(item: DeviceMetadata?)
     }
 
     companion object {

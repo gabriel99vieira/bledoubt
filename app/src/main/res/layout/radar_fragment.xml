@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".RadarActivity"
-    tools:showIn="@layout/activity_radar">
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <Button
         android:id="@+id/radar_button"
@@ -19,17 +17,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/main_menu_recyclerview"
-        android:layout_width="348dp"
-        android:layout_height="279dp"
-        android:layout_marginTop="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.492"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radar_switch"
-        tools:ignore="MissingConstraints"
-        tools:listitem="@layout/recycler_view_device" />
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/main_menu_recyclerview"-->
+<!--        android:layout_width="348dp"-->
+<!--        android:layout_height="279dp"-->
+<!--        android:layout_marginTop="12dp"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintHorizontal_bias="0.492"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/radar_switch"-->
+<!--        tools:ignore="MissingConstraints"-->
+<!--        tools:listitem="@layout/recycler_view_device" />-->
 
     <Switch
         android:id="@+id/radar_switch"
@@ -41,5 +39,29 @@
         app:layout_constraintHorizontal_bias="0.53"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/radar_button" />
+
+    <Button
+        android:id="@+id/nearby_button"
+        android:layout_width="340dp"
+        android:layout_height="46dp"
+        android:text="Nearby Devices"
+        app:layout_constraintTop_toBottomOf="@+id/radar_switch"
+        tools:layout_editor_absoluteX="32dp" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="340dp"
+        android:layout_height="46dp"
+        android:text="Button"
+        app:layout_constraintTop_toBottomOf="@+id/nearby_button"
+        tools:layout_editor_absoluteX="32dp" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="340dp"
+        android:layout_height="46dp"
+        android:text="Button"
+        app:layout_constraintTop_toBottomOf="@+id/button2"
+        tools:layout_editor_absoluteX="32dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

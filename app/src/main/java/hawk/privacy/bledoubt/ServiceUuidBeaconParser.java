@@ -103,8 +103,8 @@ public class ServiceUuidBeaconParser extends BeaconParser {
      */
     static private int bytesToInt(byte[] bytes) {
         final int bytesPerInt = 2;
-        if (bytes.length > bytesPerInt)
-            throw new InvalidParameterException("Too many bytes to convert to int.");
+        //if (bytes.length > bytesPerInt)
+       //     throw new InvalidParameterException("Too many bytes to convert to int.");
         int result = 0;
         //Log.i(TAG, String.format("Zero: %x", result));
         for (int i = 0; i < bytes.length; i++) {

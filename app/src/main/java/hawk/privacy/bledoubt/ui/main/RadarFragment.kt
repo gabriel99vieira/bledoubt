@@ -1,50 +1,49 @@
 package hawk.privacy.bledoubt.ui.main
 
-import android.bluetooth.BluetoothAdapter
-import android.content.Context
-import android.content.Intent
-import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.get
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
-import hawk.privacy.bledoubt.*
-import org.altbeacon.beacon.BeaconManager
-import org.altbeacon.beacon.BeaconParser
-import java.util.concurrent.TimeUnit
+import hawk.privacy.bledoubt.DeviceListFragment
+import hawk.privacy.bledoubt.R
+import kotlinx.android.synthetic.main.radar_fragment.view.*
 
 class RadarFragment : Fragment() {
 
     companion object {
         fun newInstance() = RadarFragment()
     }
-
-    private lateinit var viewModel: RadarViewModel
-
-
-    private fun observeViewModel() {
-        viewModel.isRadarEnabled.observe(this, Observer {
-            R.layout.radar_fragment-
-        })
-    }
+    private val TAG = "[RadarFragment]"
+    private var viewModel: RadarViewModel? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.radar_fragment, container, false)
+
+        val view = inflater.inflate(R.layout.radar_fragment, container, false)
+        view.radar_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            Log.d(TAG, "isEnabled $isChecked")
+            viewModel!!.setIsRadarEnabled(isChecked)
+        }
+
+        view.nearby_button.setOnClickListener {view ->
+            parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, DeviceListFragment::class.java, null)
+                    .addToBackStack("launch_nearby")
+                    .commit()
+        }
+
+        return view
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity()).get(RadarViewModel::class.java)
+        Log.d(TAG, "Model $viewModel")
+
+
         // TODO: Use the ViewModel
     }
 
