@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,7 +68,6 @@ public class BeaconHistory {
         this.dao = db.historyDao();
     }
 
-
     /**
      * TODO: Figure out if this actually wants to be a singleton. May want inheritance
      * so that we're not locked into static database lookups.
@@ -97,6 +98,25 @@ public class BeaconHistory {
         return dao.loadSafeDeviceMetadataLive();
     }
 
+    /**
+     * Get the devices which have been detected in the last 20 seconds.
+     *
+     * Implemented based on a Stack Overflow post:
+     * https://stackoverflow.com/questions/23129212/adding-subtracting-5-seconds-from-java-date-showing-deprected-warning
+     */
+    public synchronized LiveData<List<DeviceMetadata>> liveNearbyDeviceList() {
+        long offset_in_milliseconds = 60*1000;
+        Date a_short_time_ago = new Date();
+
+        a_short_time_ago.setTime(a_short_time_ago.getTime() - offset_in_milliseconds);
+
+        String timestamp_shortly_ago = TimestampConverter.toTimestamp(a_short_time_ago);
+        Log.d(TAG, "Recent time " + a_short_time_ago.toString());
+        Log.d(TAG, "As long: " + String.valueOf(a_short_time_ago.getTime()));
+        Log.d(TAG, "Offset: " + String.valueOf(offset_in_milliseconds));
+        Log.d(TAG, "As String" + timestamp_shortly_ago);
+        return dao.loadDeviceMetadataSinceTimeLive(timestamp_shortly_ago);
+    }
     public synchronized LiveData<List<DeviceMetadata>> getLiveSuspiciousDeviceList() {
         return dao.loadSuspiciousDeviceMetadataLive();
     }

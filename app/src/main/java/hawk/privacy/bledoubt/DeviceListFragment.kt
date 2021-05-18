@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LiveData
 
 import hawk.privacy.bledoubt.dummy.DummyContent
 import hawk.privacy.bledoubt.dummy.DummyContent.DummyItem
@@ -20,9 +21,9 @@ import hawk.privacy.bledoubt.dummy.DummyContent.DummyItem
  * [DeviceListFragment.OnListFragmentInteractionListener] interface.
  */
 class DeviceListFragment : Fragment() {
-
     // TODO: Customize parameters
     private var columnCount = 1
+    private var filter = 0;
 
     private var listener: OnListFragmentInteractionListener? = null
 
@@ -31,13 +32,14 @@ class DeviceListFragment : Fragment() {
 
         arguments?.let {
             columnCount = it.getInt(ARG_COLUMN_COUNT)
+            filter = it.getInt(ARG_LIST_TYPE)
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_device_list_list, container, false)
-        val devices = BeaconHistory.getAppBeaconHistory(requireActivity()).liveDeviceList
+        val devices = getFilteredDevices(filter);
 
         // Set the adapter
         val deviceAdapter = DeviceRecyclerViewAdapter(ArrayList(), context)
@@ -53,6 +55,18 @@ class DeviceListFragment : Fragment() {
         }
         devices.observe(viewLifecycleOwner, deviceAdapter)
         return view
+    }
+
+    private fun getFilteredDevices(filterType: Int): LiveData<List<DeviceMetadata>> {
+        val beaconHistory = BeaconHistory.getAppBeaconHistory(requireActivity())
+        when(filterType) {
+            NEARBY_TYPE -> return beaconHistory.liveNearbyDeviceList()
+            ALL_TYPE -> return  beaconHistory.liveDeviceList
+            SUSPICIOUS_TYPE -> return  beaconHistory.liveSuspiciousDeviceList
+            SAFE_TYPE -> return  beaconHistory.liveSafeDeviceList
+            else -> return beaconHistory.liveDeviceList
+        }
+
     }
 
     override fun onAttach(context: Context) {
@@ -89,6 +103,12 @@ class DeviceListFragment : Fragment() {
 
         // TODO: Customize parameter argument names
         const val ARG_COLUMN_COUNT = "column-count"
+        const val ARG_LIST_TYPE = "List_type"
+        const val NEARBY_TYPE = 0
+        const val ALL_TYPE = 1
+        const val SUSPICIOUS_TYPE = 2
+        const val SAFE_TYPE = 3
+
 
         // TODO: Customize parameter initialization
         @JvmStatic

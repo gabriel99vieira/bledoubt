@@ -28,10 +28,39 @@ class RadarFragment : Fragment() {
             viewModel!!.setIsRadarEnabled(isChecked)
         }
 
+        val nearbyBundle = Bundle()
+        nearbyBundle.putInt(DeviceListFragment.ARG_LIST_TYPE, DeviceListFragment.NEARBY_TYPE)
         view.nearby_button.setOnClickListener {view ->
             parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, DeviceListFragment::class.java, null)
+                    .replace(R.id.fragment_container, DeviceListFragment::class.java, nearbyBundle)
                     .addToBackStack("launch_nearby")
+                    .commit()
+        }
+
+        val suspiciousBundle = Bundle()
+        suspiciousBundle.putInt(DeviceListFragment.ARG_LIST_TYPE, DeviceListFragment.SUSPICIOUS_TYPE)
+        view.suspicious_button.setOnClickListener { view ->
+            parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, DeviceListFragment::class.java, suspiciousBundle)
+                    .addToBackStack("launch_suspicious")
+                    .commit()
+        }
+
+        val allBundle = Bundle()
+        allBundle.putInt(DeviceListFragment.ARG_LIST_TYPE, DeviceListFragment.ALL_TYPE)
+        view.all_button.setOnClickListener { view ->
+            parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, DeviceListFragment::class.java, allBundle)
+                    .addToBackStack("launch_all")
+                    .commit()
+        }
+
+        val safeBundle = Bundle()
+        safeBundle.putInt(DeviceListFragment.ARG_LIST_TYPE, DeviceListFragment.SAFE_TYPE)
+        view.safe_button.setOnClickListener { view ->
+            parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, DeviceListFragment::class.java, safeBundle)
+                    .addToBackStack("launch_safe")
                     .commit()
         }
 

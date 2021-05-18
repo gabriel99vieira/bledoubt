@@ -32,8 +32,11 @@ public interface HistoryDao {
     @Query("SELECT * FROM DeviceMetadata WHERE is_suspicious AND NOT is_safe")
     LiveData<List<DeviceMetadata>> loadSuspiciousDeviceMetadataLive();
 
-    @Query("SELECT * FROM DeviceMetadata WHERE is_suspicious AND NOT is_safe")
+    @Query("SELECT * FROM DeviceMetadata WHERE is_safe")
     LiveData<List<DeviceMetadata>> loadSafeDeviceMetadataLive();
+
+    @Query("SELECT meta.* FROM DeviceMetadata AS meta LEFT JOIN BeaconDetection AS last_detection ON meta.bluetoothAddress = last_detection.bluetoothAddress WHERE last_detection.timestamp = (SELECT MAX(detection.timestamp) FROM BeaconDetection AS detection WHERE detection.bluetoothAddress = last_detection.bluetoothAddress) AND last_detection.timestamp > :start_time")
+    LiveData<List<DeviceMetadata>> loadDeviceMetadataSinceTimeLive(String start_time);
 
     @Query("SELECT * FROM DeviceMetadata WHERE bluetoothAddress IN (:bluetoothAddresses)")
     DeviceMetadata[] loadMetadataForDevice(List<String> bluetoothAddresses);
