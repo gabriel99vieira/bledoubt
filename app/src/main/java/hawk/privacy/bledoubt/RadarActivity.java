@@ -142,8 +142,13 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
         if (beaconManager == null) {
             beaconManager = BeaconManager.getInstanceForApplication(this);
             beaconManager.getBeaconParsers().add(new BeaconParser(BeaconType.IBEACON.toString()).setBeaconLayout(IBEACON_LAYOUT));
-            BeaconParser p = new ServiceUuidBeaconParser(0xFEED);
-            beaconManager.getBeaconParsers().add(p);
+            BeaconParser tileParser = new ServiceUuidBeaconParser(0xFEED);
+            beaconManager.getBeaconParsers().add(tileParser);
+            BeaconParser chipoloParser = new ServiceUuidBeaconParser(0xFE65);
+            beaconManager.getBeaconParsers().add(chipoloParser);
+            BeaconParser airTagParser = new AirTagBeaconParser();
+            beaconManager.getBeaconParsers().add(airTagParser);
+
             Notification persistentNotification = Notifications.getForegroundScanningNotification(this);
             beaconManager.enableForegroundServiceScanning(persistentNotification, Notifications.FOREGROUND_NOTIFICATION_ID);
             beaconManager.setEnableScheduledScanJobs(false);
@@ -283,8 +288,10 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, RadarFragment.class, null)
+                    .addToBackStack("creeate_radar")
                     .commit();
         }
+        
 
         initToolbar();
     }
@@ -350,6 +357,8 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
         intent.putExtra(Intent.EXTRA_TITLE, suggestedName);
         startActivityForResult(intent, SAVE_TO_JSON_REQUEST_CODE);
     }
+
+
 
     @Override
     public void onListFragmentInteraction(@Nullable DeviceMetadata item) {

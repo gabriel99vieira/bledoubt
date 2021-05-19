@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import hawk.privacy.bledoubt.DeviceListFragment
@@ -18,6 +19,7 @@ class RadarFragment : Fragment() {
     }
     private val TAG = "[RadarFragment]"
     private var viewModel: RadarViewModel? = null
+    private var backStackCallback: OnBackPressedCallback? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -76,5 +78,17 @@ class RadarFragment : Fragment() {
         // TODO: Use the ViewModel
     }
 
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        backStackCallback = object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (viewModel?.getIsRadarEnabled()?.value!!) {
+                    requireActivity().moveTaskToBack(true)
+                } else {
+                    requireActivity().onBackPressed()
+                }
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(this, backStackCallback!!)
+    }
 }

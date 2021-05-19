@@ -63,7 +63,7 @@ public class ServiceUuidBeaconParser extends BeaconParser {
      * https://www.bluetooth.com/specifications/assigned-numbers/generic-access-profile/
      */
     private class EirPacket {
-        public byte type;
+        public short type;
         public byte[] data;
         public EirPacket(byte type, byte[] data) {
             this.type = type;
