@@ -288,10 +288,9 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, RadarFragment.class, null)
-                    .addToBackStack("creeate_radar")
                     .commit();
         }
-        
+
 
         initToolbar();
     }

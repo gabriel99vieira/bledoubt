@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import hawk.privacy.bledoubt.DeviceListFragment
 import hawk.privacy.bledoubt.R
@@ -72,7 +73,10 @@ class RadarFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity()).get(RadarViewModel::class.java)
-        Log.d(TAG, "Model $viewModel")
+        viewModel?.getIsRadarEnabled()?.observe(viewLifecycleOwner, Observer { enabled: Boolean ->
+            backStackCallback?.isEnabled = enabled
+        })
+        //Log.d(TAG, "Model $viewModel")
 
 
         // TODO: Use the ViewModel
@@ -80,13 +84,9 @@ class RadarFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        backStackCallback = object: OnBackPressedCallback(true) {
+        backStackCallback = object: OnBackPressedCallback(false) {
             override fun handleOnBackPressed() {
-                if (viewModel?.getIsRadarEnabled()?.value!!) {
-                    requireActivity().moveTaskToBack(true)
-                } else {
-                    requireActivity().onBackPressed()
-                }
+                requireActivity().moveTaskToBack(true)
             }
         }
         requireActivity().onBackPressedDispatcher.addCallback(this, backStackCallback!!)
