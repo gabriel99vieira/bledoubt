@@ -51,7 +51,7 @@ public class ServiceUuidBeaconParser extends BeaconParser {
         Beacon beacon = builder.build();
         //Log.i(TAG, String.format("Built %x -- expected %x", beacon.getServiceUuid(), this.serviceUuid));
         if (beacon.getServiceUuid() == this.serviceUuid) {
-            //Log.i(TAG, "BLAM");
+            Log.i(TAG, "BLAM");
             return beacon;
         }
         return null;
@@ -63,7 +63,7 @@ public class ServiceUuidBeaconParser extends BeaconParser {
      * https://www.bluetooth.com/specifications/assigned-numbers/generic-access-profile/
      */
     private class EirPacket {
-        public short type;
+        public byte type;
         public byte[] data;
         public EirPacket(byte type, byte[] data) {
             this.type = type;

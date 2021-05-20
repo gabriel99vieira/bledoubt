@@ -241,10 +241,6 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
         setSupportActionBar(toolbar);
     }
 
-
-
-
-
     @Override
     public void onBeaconServiceConnect() {
         beaconManager.removeAllRangeNotifiers();
@@ -290,12 +286,8 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
                     .replace(R.id.fragment_container, RadarFragment.class, null)
                     .commit();
         }
-
-
         initToolbar();
     }
-
-
 
     @Override
     protected void onDestroy() {

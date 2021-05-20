@@ -33,6 +33,7 @@ import androidx.annotation.NonNull;
 public class InspectDeviceActivity extends Activity {
     public static final String BLUETOOTH_ADDRESS_MESSAGE = "hawk.privacy.bledoubt.bluetooth_address";
     public static final int MAP_CAMERA_DEFAULT_PADDING = 100;
+    public static final double EPSILON_LATLONG = 0.00001;
     private MapView mapView;
 
     @Override
@@ -70,6 +71,8 @@ public class InspectDeviceActivity extends Activity {
                                     trajectoryToMapFeature(traj)
                         )));
 
+                        // TODO: Make this a dot instead of a line if size(traj) = 1.
+
                         // Apply visual style to trajectory data
                         style.addLayer(new LineLayer("linelayer", "line-source").withProperties(
                                 PropertyFactory.lineDasharray(new Float[] {0.01f, 2f}),
@@ -86,6 +89,11 @@ public class InspectDeviceActivity extends Activity {
                 for (BeaconDetection detection : traj) {
                     latLngBoundsBuilder.include(new LatLng(detection.latitude, detection.longitude));
                 }
+                // TODO: Make this less hacky. Goal is to avoid failure case with just one point.
+                latLngBoundsBuilder.include(new LatLng(traj.detections.get(0).latitude + EPSILON_LATLONG,
+                        traj.detections.get(0).longitude + EPSILON_LATLONG));
+                latLngBoundsBuilder.include(new LatLng(traj.detections.get(0).latitude - EPSILON_LATLONG,
+                        traj.detections.get(0).longitude - EPSILON_LATLONG));
                 LatLngBounds bounds = latLngBoundsBuilder.build();
                 mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, MAP_CAMERA_DEFAULT_PADDING));
             }
