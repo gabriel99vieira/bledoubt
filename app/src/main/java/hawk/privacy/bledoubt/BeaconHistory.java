@@ -157,7 +157,6 @@ public class BeaconHistory {
      * @param detection
      */
     public synchronized void add(Beacon beacon, BeaconType type, BeaconDetection detection) {
-        Log.i(TAG, "Adding " + beacon.getBluetoothAddress());
         dao.insertDetections(detection);
         dao.insertMetadata(new DeviceMetadata(beacon, type));
     }

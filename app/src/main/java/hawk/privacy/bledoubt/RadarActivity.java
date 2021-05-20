@@ -142,10 +142,13 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
         if (beaconManager == null) {
             beaconManager = BeaconManager.getInstanceForApplication(this);
             beaconManager.getBeaconParsers().add(new BeaconParser(BeaconType.IBEACON.toString()).setBeaconLayout(IBEACON_LAYOUT));
-            BeaconParser tileParser = new ServiceUuidBeaconParser(0xFEED);
+
+            BeaconParser tileParser = new ServiceUuidBeaconParser(0xFEED, "Tile");
             beaconManager.getBeaconParsers().add(tileParser);
-            BeaconParser chipoloParser = new ServiceUuidBeaconParser(0xFE65);
+            BeaconParser chipoloParser = new ServiceUuidBeaconParser(0xFE65, "Chipolo");
             beaconManager.getBeaconParsers().add(chipoloParser);
+            BeaconParser spotParser = new ServiceUuidBeaconParser(0xFF00, "Spot");
+            beaconManager.getBeaconParsers().add(spotParser);
             BeaconParser airTagParser = new AirTagBeaconParser();
             beaconManager.getBeaconParsers().add(airTagParser);
 
@@ -300,7 +303,6 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
             Log.i(TAG, "Parser " + beacon.getParserIdentifier() + ". Mac " + beacon.getBluetoothAddress());
             Location loc = locationTracker.getLastLocation();
             String oui = ouiLookup.lookupOui(beacon.getBluetoothAddress());
-            Log.i(TAG, "OUI " + oui);
             if (loc != null) {
                 beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(beacon, new Date(), loc));
             }

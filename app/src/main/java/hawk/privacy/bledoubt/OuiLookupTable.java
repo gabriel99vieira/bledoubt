@@ -59,7 +59,6 @@ public class OuiLookupTable {
                 if (len > mac.length())
                     continue;
                 String oui = macPrefixToString.get(mac.substring(0, len));
-                Log.i(TAG,  mac.substring(0, len) + " " + oui);
                 if (oui != null) {
                     return oui;
                 }

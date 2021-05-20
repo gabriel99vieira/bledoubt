@@ -17,13 +17,16 @@ public class ServiceUuidBeaconParser extends BeaconParser {
     private static String TAG = "[ServiceUuidBeaconParser]";
     private static final byte FLAGS_TYPE = 0x01;
     private static final byte COMPLETE_SERVICE_ID_16_BIT_TYPE = 0x03;
+    private static final byte INCOMPLETE_SERVICE_ID_16_BIT_TYPE = 0x02;
 
     private int serviceUuid;
-    public ServiceUuidBeaconParser(int serviceUuid) {
+    public ServiceUuidBeaconParser(int serviceUuid, String parserIdentifier) {
         Log.i(TAG, "Constructor" + serviceUuid);
         this.serviceUuid = serviceUuid;
+        this.mIdentifier = parserIdentifier;
     }
 
+    // https://www.bluetooth.com/specifications/assigned-numbers/generic-access-profile/
     @Override
     public Beacon fromScanData(byte[] bytesToProcess, int rssi, BluetoothDevice device, long timestampMs) {
         if (bytesToProcess == null)
@@ -37,6 +40,7 @@ public class ServiceUuidBeaconParser extends BeaconParser {
             .setId1("")
             .setId2("")
             .setId3("")
+            .setParserIdentifier(mIdentifier)
             ;
 
         for (EirPacket packet : enumeratePackets(bytesToProcess)) {
@@ -44,6 +48,8 @@ public class ServiceUuidBeaconParser extends BeaconParser {
                 case COMPLETE_SERVICE_ID_16_BIT_TYPE:
                     builder.setServiceUuid(bytesToInt(packet.data));
                     //Log.i(TAG, String.format("UUID %x", bytesToInt(packet.data)));
+                case INCOMPLETE_SERVICE_ID_16_BIT_TYPE:
+                    builder.setServiceUuid(bytesToInt(packet.data));
                 default:
                     continue;
             }
@@ -51,7 +57,6 @@ public class ServiceUuidBeaconParser extends BeaconParser {
         Beacon beacon = builder.build();
         //Log.i(TAG, String.format("Built %x -- expected %x", beacon.getServiceUuid(), this.serviceUuid));
         if (beacon.getServiceUuid() == this.serviceUuid) {
-            Log.i(TAG, "BLAM");
             return beacon;
         }
         return null;

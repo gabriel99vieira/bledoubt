@@ -21,8 +21,6 @@ public interface HistoryDao {
     @Delete
     void deleteMetadata(DeviceMetadata... metadata);
 
-
-
     @Query("SELECT * FROM DeviceMetadata")
     DeviceMetadata[] loadAllDeviceMetadata();
 
