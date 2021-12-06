@@ -11,6 +11,27 @@ import androidx.work.WorkerParameters;
 
 
 public class HistoryAnalyzer extends Worker {
+    public class TopologicalClassifier {
+        protected final float epsilonSeconds;
+        protected final float minDiameterSeconds;
+        protected final float minDurationSeconds;
+
+        public TopologicalClassifier(float epsilonSeconds, float minDiameterMeters, float minDurationMeters) {
+            this.epsilonSeconds = epsilonSeconds;
+            this.minDiameterSeconds = minDiameterMeters;
+            this.minDurationSeconds = minDurationMeters;
+        }
+
+        public boolean isSuspicious(Trajectory trajectory) {
+            List<Trajectory> epsilon_components = trajectory.getEpsilonComponents(epsilonSeconds);
+            //epsilon_components.stream().anyMatch(t
+            //        -> t.getDurationInSeconds() > minDurationSeconds && t.getDiameter() > minDiameterSeconds
+            //);
+            return false;
+        }
+    }
+
+
     static final double MAX_BLE_RANGE_M = 10;
      //public static Vector<Beacon> findTrackingBeacons( BeaconHistory _history) {
       //  BeaconHistory history = new BeaconHistory(_history);
@@ -56,6 +77,8 @@ public class HistoryAnalyzer extends Worker {
         double distance = radiusOfEarthMeters * centralAngle;
         return distance;
     }
+
+
 
 
     public static final String TAG = "[HistoryAnalyzer]";
