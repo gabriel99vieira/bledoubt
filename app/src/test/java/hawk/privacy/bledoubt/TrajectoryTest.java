@@ -19,7 +19,7 @@ public class TrajectoryTest {
     }
 
     @Test
-    public void convexHullRemovesCentralPointAndPreservesHullInFourPointTrajectory() {
+    public void convex_hull_removes_central_point_and_preserves_hull_in_four_point_trajectory() {
         ArrayList<BeaconDetection> dets = new ArrayList<>();
         dets.add(new BeaconDetection("00:11:22:33:44:55", new Date(), 10, -50, -35));
         dets.add(new BeaconDetection("00:11:22:33:44:55", new Date(), 10, -70, -35));
@@ -36,7 +36,7 @@ public class TrajectoryTest {
     }
 
     @Test
-    public void getEpsilonComponentsDecomposesThreePartTrajectory() {
+    public void get_epsilon_components_decomposes_three_part_trajectory() {
         ArrayList<BeaconDetection> dets = new ArrayList<>();
         dets.add(new BeaconDetection("00:11:22:33:44:55", Date.from(Instant.ofEpochSecond(1)), 10, -50, -35));
         dets.add(new BeaconDetection("00:11:22:33:44:55", Date.from(Instant.ofEpochSecond(62)), 10, -70, -35));
@@ -58,4 +58,5 @@ public class TrajectoryTest {
         }
     }
 
+    // TODO: Add test for diameter.
 }

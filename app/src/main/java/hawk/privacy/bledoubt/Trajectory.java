@@ -70,11 +70,12 @@ public class Trajectory implements  Iterable<BeaconDetection> {
     public double getDiameterInMeters() {
         /** Return the duration from the first to the last detection as a .
          *
+         * Currently using brute force method. O(n^2) Intend to improve as follows:
+         *
          * Algorithm Notes:
          *
          * 1. Calculate the convex hull using Andrew's Monotone Chain algorithm, in lat-long space.
          * 2. Find max distance Shamos's method of the Rotating Calipers.
-         *
          *
          * Using the method of the Rotating Calipers from Toussaint, 1983
          * https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.155.5671&rep=rep1&type=pdf
@@ -82,10 +83,11 @@ public class Trajectory implements  Iterable<BeaconDetection> {
          * Based on PhD thesis of Shamos 1978
          * http://euro.ecom.cmu.edu/people/faculty/mshamos/1978ShamosThesis.pdf
          */
-        if (detections.isEmpty())
-            return 0;
-
-        ArrayList<Point2d> convex_hull = getConvexHull();
+        return naiveDiameterInMeters();
+        //if (detections.isEmpty())
+        //    return 0;
+        //
+        //ArrayList<Point2d> convex_hull = getConvexHull();
 
         //ArrayList<Point3D> sphericalPoints = transformToEuclideanSpace(centroid_lat, centroid_long);
         //Point3D origin = sphericalPoints.get(0);
@@ -94,7 +96,22 @@ public class Trajectory implements  Iterable<BeaconDetection> {
         //    diameterLowerBound = Math.max(diameterLowerBound, point.distance(origin));
         //}
         // TODO Finish
-        return 0;
+        //return 0;
+    }
+
+    /**
+     * Calculate the diameter of the trajectory by measuring every possible pair of points this is
+     * slow at O(n^2)
+     * @return diameter
+     */
+    private double naiveDiameterInMeters() {
+        double diameter = 0;
+        for (BeaconDetection det1 : detections) {
+            for (BeaconDetection det2 : detections) {
+                diameter = Math.max(diameter, det1.distanceInMeters(det2));
+            }
+        }
+        return  diameter;
     }
 
     /**
