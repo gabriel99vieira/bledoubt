@@ -56,6 +56,13 @@ public class BeaconDetection {
                 other.longitude, other.rssi);
     }
 
+    double timeDifferenceInSeconds(BeaconDetection other) {
+        long otherMillis = other.timestamp.getTime();
+        long thisMillis = this.timestamp.getTime();
+        long durationMillis = (thisMillis - otherMillis);
+        return durationMillis / 1000.0;
+    }
+
     public JSONObject toJSONObject() {
         JSONObject result = new JSONObject();
         try {

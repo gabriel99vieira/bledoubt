@@ -33,16 +33,39 @@ public class Trajectory implements  Iterable<BeaconDetection> {
         return detections.iterator();
     }
 
+    /**
+     * Get the duration from the first to the last detection in seconds as a double.
+     * @return total_seconds
+     */
     public double getDurationInSeconds() {
-        /** Return the duration from the first to the last detection as a .
-         */
-        long startMillis = this.detections.get(0).timestamp.getTime();
-        long endMillis = this.detections.get(detections.size() - 1).timestamp.getTime();
-        long durationMillis = (endMillis - startMillis);
-        return durationMillis / 1000.0;
+        return detections.get(detections.size() - 1).timeDifferenceInSeconds(detections.get(0));
     }
 
+    /**
+     * Get the number of detections in the trajectory
+     * @return num_detections
+     */
+    public int size() {
+        return this.detections.size();
+    }
 
+    /**
+     * Returns true if the trajectory is epsilon-connected, i.e. if there are no gaps
+     * of greater than `epsilon_seconds` seconds between adjecent detections in the trajectory.
+     * @param epsilon_seconds
+     * @return true iff epsilon connected
+     */
+    public boolean isEpsilonConnected(double epsilon_seconds) {
+        if (this.detections.size() < 2) {
+            return true;
+        }
+        for (int i = 1; i < this.detections.size(); i++) {
+            if (detections.get(i).timeDifferenceInSeconds(detections.get(i-1)) > epsilon_seconds) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     public double getDiameterInMeters() {
         /** Return the duration from the first to the last detection as a .
@@ -137,8 +160,24 @@ public class Trajectory implements  Iterable<BeaconDetection> {
 //        return sphericalPoints;
 //    }
 
-    public List<Trajectory> getEpsilonComponents(float epsilon) {
+    /**
+     * Split the trajectory into a sequence of "epsilon-components," contiguous subtrajectories
+     * whose disjoint union disjoint union forms this trajectory. Each epsilon-component is
+     * separated in time from all the others by at least `epsilon_seconds` seconds.
+     *
+     * @param epsilon_seconds
+     * @return List of epsilon-components
+     */
+    public List<Trajectory> getEpsilonComponents(double epsilon_seconds) {
         List<Trajectory> components = new ArrayList<>();
+        int componentStartIndex = 0;
+        for (int i = 1; i < this.size(); i++) {
+            if (detections.get(i).timeDifferenceInSeconds(detections.get(i-1)) > epsilon_seconds) {
+                components.add(new Trajectory(detections.subList(componentStartIndex, i)));
+                componentStartIndex = i;
+            }
+        }
+        components.add(new Trajectory(detections.subList(componentStartIndex, detections.size())));
         return components;
     }
 
