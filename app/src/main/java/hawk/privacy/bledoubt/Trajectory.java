@@ -33,6 +33,10 @@ public class Trajectory implements  Iterable<BeaconDetection> {
         return detections.iterator();
     }
 
+    public List<BeaconDetection> getDetections() {
+        return detections;
+    }
+
     /**
      * Get the duration from the first to the last detection in seconds as a double.
      * @return total_seconds

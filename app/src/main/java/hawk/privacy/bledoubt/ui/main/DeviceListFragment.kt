@@ -1,4 +1,4 @@
-package hawk.privacy.bledoubt
+package hawk.privacy.bledoubt.ui.main
 
 import android.content.Context
 import android.os.Bundle
@@ -11,9 +11,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.LiveData
-
-import hawk.privacy.bledoubt.dummy.DummyContent
-import hawk.privacy.bledoubt.dummy.DummyContent.DummyItem
+import hawk.privacy.bledoubt.BeaconHistory
+import hawk.privacy.bledoubt.DeviceMetadata
+import hawk.privacy.bledoubt.DeviceRecyclerViewAdapter
+import hawk.privacy.bledoubt.R
 
 /**
  * A fragment representing a list of Items.
@@ -43,7 +44,7 @@ class DeviceListFragment : Fragment() {
 
         // Set the adapter
         val deviceAdapter = DeviceRecyclerViewAdapter(ArrayList(), context)
-        Log.d("Dvices", devices.value.toString())
+        Log.d("Devices", devices.value.toString())
         if (view is RecyclerView) {
             with(view) {
                 layoutManager = when {

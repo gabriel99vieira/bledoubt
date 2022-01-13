@@ -17,8 +17,6 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.CompoundButton;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import org.altbeacon.beacon.Beacon;
@@ -43,6 +41,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
+
+import com.mapbox.mapboxsdk.Mapbox;
+
+import hawk.privacy.bledoubt.ui.main.DeviceListFragment;
 import hawk.privacy.bledoubt.ui.main.RadarFragment;
 import hawk.privacy.bledoubt.ui.main.RadarViewModel;
 
@@ -164,7 +166,8 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
     private void activateLocationTracker() {
         if (locationTracker == null) {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            locationTracker = new LocationTracker(locationManager);
+            locationTracker = new LocationTracker(this);
+            Log.d(TAG, "Turning on location");
         }
     }
 
@@ -305,6 +308,8 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
             String oui = ouiLookup.lookupOui(beacon.getBluetoothAddress());
             if (loc != null) {
                 beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(beacon, new Date(), loc));
+            } else {
+                Log.i(TAG, "No location data. Parser cannot store beacon.");
             }
         }
     }

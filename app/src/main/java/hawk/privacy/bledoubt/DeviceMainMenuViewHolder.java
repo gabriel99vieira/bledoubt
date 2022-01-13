@@ -8,7 +8,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
+
+import hawk.privacy.bledoubt.ui.main.InspectDeviceFragment;
+import hawk.privacy.bledoubt.ui.main.RadarFragment;
 
 public class DeviceMainMenuViewHolder extends RecyclerView.ViewHolder implements  View.OnClickListener {
     private TextView view;
@@ -30,8 +34,11 @@ public class DeviceMainMenuViewHolder extends RecyclerView.ViewHolder implements
 
     @Override
     public void onClick(View v) {
-        Intent intent = new Intent(context, InspectDeviceActivity.class);
-        intent.putExtra(InspectDeviceActivity.BLUETOOTH_ADDRESS_MESSAGE, viewModel.bluetoothAddress);
-        context.startActivity(intent);
+        //Intent intent = new Intent(context, InspectDeviceFragment.class);
+        //intent.putExtra(InspectDeviceFragment.BLUETOOTH_ADDRESS_MESSAGE, viewModel.bluetoothAddress);
+        //((AppCompatActivity)context).getSupportFragmentManager().beginTransaction()
+        //        .replace(R.id.fragment_container, InspectDeviceFragment.class, null)
+        //        .commit();
+        //context.startActivity(intent);
     }
 }

@@ -15,10 +15,13 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import hawk.privacy.bledoubt.ui.main.InspectDeviceFragment;
+
 public class Notifications {
     public static final String DEFAULT_CHANNEL_ID = "default_channel";
     public static final String FOREGROUND_CHANNEL_ID = "foreground_channel";
     public static final int FOREGROUND_NOTIFICATION_ID = 1;
+    public static final int SUSPICIOUS_NOTIFICATION_ID = 2;
 
     private static Notifications instance;
 
@@ -29,8 +32,8 @@ public class Notifications {
         return instance;
     }
 
-    private int next_notification_id = FOREGROUND_NOTIFICATION_ID + 1; // This will overflow eventually.
-    private List<Integer> activeNotifications = new ArrayList<>();
+    //private int next_notification_id = FOREGROUND_NOTIFICATION_ID + 1; // This will overflow eventually.
+    //private List<Integer> activeNotifications = new ArrayList<>();
 
     /**
      * Must be called once before any notfications can be produced on Android 8.0+
@@ -80,10 +83,11 @@ public class Notifications {
      */
     public void createSuspiciousDeviceNotification(Context context, DeviceMetadata deviceMetadata) {
         // Create intent to open InspectDeviceActivity
-        Intent startInspectDeviceActivityIntent = new Intent(context, InspectDeviceActivity.class);
+        Intent startInspectDeviceActivityIntent = new Intent(context, InspectDeviceFragment.class);
         startInspectDeviceActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startInspectDeviceActivityIntent.putExtra(InspectDeviceActivity.BLUETOOTH_ADDRESS_MESSAGE, deviceMetadata.bluetoothAddress);
+        startInspectDeviceActivityIntent.putExtra(InspectDeviceFragment.BLUETOOTH_ADDRESS_MESSAGE, deviceMetadata.bluetoothAddress);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startInspectDeviceActivityIntent, 0);
+
 
         // Build notification.
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
@@ -94,10 +98,7 @@ public class Notifications {
                 .setAutoCancel(true)
                 .addAction(R.mipmap.doubter_launcher0, context.getString(R.string.suspicious_notification_accept), pendingIntent);
         Notification note = builder.build();
-        NotificationManagerCompat.from(context).notify(next_notification_id, note);
-
-        // Keep track of active notifications.
-        next_notification_id += 1;
+        NotificationManagerCompat.from(context).notify(SUSPICIOUS_NOTIFICATION_ID, note);
     }
 
     /**
@@ -121,6 +122,5 @@ public class Notifications {
 
     public void clearAllNotifications(Context context) {
         NotificationManagerCompat.from(context).cancelAll();
-        activeNotifications.clear();
     }
 }
