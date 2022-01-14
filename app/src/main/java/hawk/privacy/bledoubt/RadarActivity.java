@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -269,6 +270,7 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Mapbox.getInstance(this, getResources().getString(R.string.mapbox_api_key));
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         beaconHistory = BeaconHistory.getAppBeaconHistory(this);
         context = getApplicationContext();
@@ -308,6 +310,7 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
             String oui = ouiLookup.lookupOui(beacon.getBluetoothAddress());
             if (loc != null) {
                 beaconHistory.add(beacon, BeaconType.IBEACON, new BeaconDetection(beacon, new Date(), loc));
+                Log.d(TAG, " " + beaconHistory.getTrajectory(beacon.getBluetoothAddress()).size());
             } else {
                 Log.i(TAG, "No location data. Parser cannot store beacon.");
             }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.mapbox.mapboxsdk.Mapbox
 import android.content.Intent
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,7 +32,7 @@ import hawk.privacy.bledoubt.databinding.InspectDeviceFragmentBinding
 import java.util.ArrayList
 
 class InspectDeviceFragment : Fragment() {
-    private var mapView: MapView? = null
+    //private var mapView: MapView? = null
     private var bluetoothAddress: String? = null
     private lateinit var binding: InspectDeviceFragmentBinding
 
@@ -46,12 +47,17 @@ class InspectDeviceFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
+
+
+
+        Log.d(tag, "la" +  bluetoothAddress)
         //Mapbox.getInstance(this, resources.getString(R.string.mapbox_api_key))
         binding.inspectLayoutTitle.text = bluetoothAddress
+
         val traj = BeaconHistory.getAppBeaconHistory(inflater.context).getTrajectory(bluetoothAddress)
 
-        mapView!!.onCreate(savedInstanceState)
-        mapView!!.getMapAsync { mapboxMap ->
+        binding.mapView!!.onCreate(savedInstanceState)
+        binding.mapView!!.getMapAsync { mapboxMap ->
             mapboxMap.setStyle(Style.MAPBOX_STREETS) { style -> // Add data for trajectory to renderer;
                 style.addSource(
                     GeoJsonSource(
@@ -82,26 +88,28 @@ class InspectDeviceFragment : Fragment() {
                 latLngBoundsBuilder.include(LatLng(detection.latitude, detection.longitude))
             }
             // TODO: Make this less hacky. Goal is to avoid failure case with just one point.
-            latLngBoundsBuilder.include(
-                LatLng(
-                    traj.detections[0].latitude + EPSILON_LATLONG,
-                    traj.detections[0].longitude + EPSILON_LATLONG
+            Log.d(tag, bluetoothAddress + " " + traj.toString())
+            if (traj.size() > 1) {
+                latLngBoundsBuilder.include(
+                    LatLng(
+                        traj.detections[0].latitude + EPSILON_LATLONG,
+                        traj.detections[0].longitude + EPSILON_LATLONG
+                    )
                 )
-            )
-            latLngBoundsBuilder.include(
-                LatLng(
-                    traj.detections[0].latitude - EPSILON_LATLONG,
-                    traj.detections[0].longitude - EPSILON_LATLONG
+                latLngBoundsBuilder.include(
+                    LatLng(
+                        traj.detections[0].latitude - EPSILON_LATLONG,
+                        traj.detections[0].longitude - EPSILON_LATLONG
+                    )
                 )
-            )
-            val bounds = latLngBoundsBuilder.build()
-            mapboxMap.animateCamera(
-                CameraUpdateFactory.newLatLngBounds(
-                    bounds,
-                    MAP_CAMERA_DEFAULT_PADDING
+                val bounds = latLngBoundsBuilder.build()
+                mapboxMap.animateCamera(
+                    CameraUpdateFactory.newLatLngBounds(
+                        bounds,
+                        MAP_CAMERA_DEFAULT_PADDING
+                    )
                 )
-            )
-
+            }
         }
         return binding.root
     }
@@ -111,37 +119,37 @@ class InspectDeviceFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        mapView!!.onStart()
+        binding.mapView!!.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView!!.onResume()
+        binding.mapView!!.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView!!.onPause()
+        binding.mapView!!.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView!!.onStop()
+        binding.mapView!!.onStop()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView!!.onLowMemory()
+        binding.mapView!!.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView!!.onDestroy()
+        binding.mapView!!.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView!!.onSaveInstanceState(outState)
+        binding.mapView!!.onSaveInstanceState(outState)
     }
 
     companion object {

@@ -34,6 +34,7 @@ class DeviceListFragment : Fragment() {
         arguments?.let {
             columnCount = it.getInt(ARG_COLUMN_COUNT)
             filter = it.getInt(ARG_LIST_TYPE)
+
         }
     }
 
@@ -45,6 +46,7 @@ class DeviceListFragment : Fragment() {
         // Set the adapter
         val deviceAdapter = DeviceRecyclerViewAdapter(ArrayList(), context)
         Log.d("Devices", devices.value.toString())
+        Log.d(tag, "Tag " + filter)
         if (view is RecyclerView) {
             with(view) {
                 layoutManager = when {
@@ -61,13 +63,12 @@ class DeviceListFragment : Fragment() {
     private fun getFilteredDevices(filterType: Int): LiveData<List<DeviceMetadata>> {
         val beaconHistory = BeaconHistory.getAppBeaconHistory(requireActivity())
         when(filterType) {
-            NEARBY_TYPE -> return beaconHistory.liveNearbyDeviceList()
+            NEARBY_TYPE -> return beaconHistory.liveNearbyDeviceList
             ALL_TYPE -> return  beaconHistory.liveDeviceList
             SUSPICIOUS_TYPE -> return  beaconHistory.liveSuspiciousDeviceList
             SAFE_TYPE -> return  beaconHistory.liveSafeDeviceList
             else -> return beaconHistory.liveDeviceList
         }
-
     }
 
     override fun onAttach(context: Context) {

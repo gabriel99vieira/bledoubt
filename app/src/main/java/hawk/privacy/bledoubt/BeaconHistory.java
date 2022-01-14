@@ -104,7 +104,7 @@ public class BeaconHistory {
      * Implemented based on a Stack Overflow post:
      * https://stackoverflow.com/questions/23129212/adding-subtracting-5-seconds-from-java-date-showing-deprected-warning
      */
-    public synchronized LiveData<List<DeviceMetadata>> liveNearbyDeviceList() {
+    public synchronized LiveData<List<DeviceMetadata>> getLiveNearbyDeviceList() {
         long offset_in_milliseconds = 60*1000;
         Date a_short_time_ago = new Date();
 

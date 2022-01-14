@@ -74,7 +74,7 @@ class RadarFragment : Fragment() {
 
         val safeBundle = Bundle()
         safeBundle.putInt(DeviceListFragment.ARG_LIST_TYPE, DeviceListFragment.SAFE_TYPE)
-        binding.allButton.setOnClickListener {
+        binding.safeButton.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace<DeviceListFragment>(R.id.fragment_container, null, safeBundle)
                     .addToBackStack("launch_safe")
