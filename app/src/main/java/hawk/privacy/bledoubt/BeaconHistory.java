@@ -98,6 +98,10 @@ public class BeaconHistory {
         return dao.loadSafeDeviceMetadataLive();
     }
 
+    public synchronized int countSuspiciousDevices() {
+        return dao.countSuspiciousDevices();
+    }
+
     /**
      * Get the devices which have been detected in the last 20 seconds.
      *
@@ -146,6 +150,23 @@ public class BeaconHistory {
         }
         DeviceMetadata metadata = data[0];
         metadata.isSafe = isSafe;
+        dao.updateMetadata(metadata);
+        return true;
+    }
+
+    /**
+     * Record whether or not the user believes a particular device is suspicious.
+     * @param bluetoothAddress the BLE address of the device
+     * @param isSuspicious true if the device may be following the user around
+     * @return success
+     */
+    public synchronized boolean markSuspicious(String bluetoothAddress, boolean isSuspicious) {
+        DeviceMetadata[] data = dao.loadMetadataForDevice(Collections.singletonList(bluetoothAddress));
+        if (data.length == 0) {
+            return false;
+        }
+        DeviceMetadata metadata = data[0];
+        metadata.isSuspicious = isSuspicious;
         dao.updateMetadata(metadata);
         return true;
     }

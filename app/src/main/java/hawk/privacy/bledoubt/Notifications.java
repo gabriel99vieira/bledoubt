@@ -86,7 +86,32 @@ public class Notifications {
         Intent startInspectDeviceActivityIntent = new Intent(context, InspectDeviceFragment.class);
         startInspectDeviceActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startInspectDeviceActivityIntent.putExtra(InspectDeviceFragment.BLUETOOTH_ADDRESS_MESSAGE, deviceMetadata.bluetoothAddress);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startInspectDeviceActivityIntent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startInspectDeviceActivityIntent, PendingIntent.FLAG_IMMUTABLE);
+
+
+        // Build notification.
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
+                .setSmallIcon(R.mipmap.doubter_launcher0)
+                .setContentTitle(context.getString(R.string.suspicious_notification_title))
+                .setContentText( context.getString(R.string.suspicious_notification_text))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .addAction(R.mipmap.doubter_launcher0, context.getString(R.string.suspicious_notification_accept), pendingIntent);
+        Notification note = builder.build();
+        NotificationManagerCompat.from(context).notify(SUSPICIOUS_NOTIFICATION_ID, note);
+    }
+
+    /**
+     * Creates a notification warning the user of multiple suspicious devices.
+     * @param context
+     * @param deviceMetadata corresponding to the suspicious device
+     */
+    public void createSuspiciousMultiDeviceNotification(Context context, int deviceCount) {
+        // Create intent to open InspectDeviceActivity
+        Intent startInspectDeviceActivityIntent = new Intent(context, InspectDeviceFragment.class);
+        startInspectDeviceActivityIntent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);//Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startInspectDeviceActivityIntent.putExtra(InspectDeviceFragment.BLUETOOTH_ADDRESS_MESSAGE, deviceMetadata.bluetoothAddress);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startInspectDeviceActivityIntent, PendingIntent.FLAG_IMMUTABLE);
 
 
         // Build notification.
@@ -109,7 +134,7 @@ public class Notifications {
     public static Notification getForegroundScanningNotification(Context context) {
         Intent intent = new Intent(context, RadarActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
-                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)

@@ -105,7 +105,7 @@ public class Trajectory implements  Iterable<BeaconDetection> {
 
     /**
      * Calculate the diameter of the trajectory by measuring every possible pair of points this is
-     * slow at O(n^2)
+     * slow at O(n^2).
      * @return diameter
      */
     private double naiveDiameterInMeters() {
@@ -115,7 +115,19 @@ public class Trajectory implements  Iterable<BeaconDetection> {
                 diameter = Math.max(diameter, det1.distanceInMeters(det2));
             }
         }
-        return  diameter;
+        return diameter;
+    }
+
+    public double getDiameterLowerBoundInMeters() {
+        if (detections.size() < 1) {
+            return 0;
+        }
+        double lower_bound = 0;
+        BeaconDetection det1 = detections.get(0);
+        for (BeaconDetection det2 : detections) {
+            lower_bound = Math.max(lower_bound, det1.distanceInMeters(det2));
+        }
+        return lower_bound;
     }
 
     /**

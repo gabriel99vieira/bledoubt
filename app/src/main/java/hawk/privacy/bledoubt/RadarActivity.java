@@ -175,8 +175,20 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
     private boolean requestLocationPermissions() {
         boolean missingAnyPermission = false;
         boolean needsAnyRationale = false;
-        String[] permissions = new String[]{ Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION};
+        String[] permissions = new String[0];
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            permissions = new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+            };
+        } else {
+            permissions = new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            };
+        }
         for (String permission_name : permissions) {
             if (checkSelfPermission(permission_name) != PackageManager.PERMISSION_GRANTED) {
                 missingAnyPermission = true;
@@ -331,6 +343,10 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
                 confirmAndDeleteHistory();
                 return true;
             case R.id.export_history:
+                requestUriForSaveToJson();
+                return true;
+            case R.id.force_analyze:
+                HistoryAnalyzer.analyze(this, new HistoryAnalyzer.TopologicalClassifier(60,300,300));
                 requestUriForSaveToJson();
                 return true;
             default:

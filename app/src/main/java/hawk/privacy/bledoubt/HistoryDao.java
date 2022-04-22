@@ -30,6 +30,9 @@ public interface HistoryDao {
     @Query("SELECT * FROM DeviceMetadata WHERE is_suspicious AND NOT is_safe")
     LiveData<List<DeviceMetadata>> loadSuspiciousDeviceMetadataLive();
 
+    @Query("SELECT COUNT(bluetoothAddress)  FROM DeviceMetadata WHERE is_suspicious AND NOT is_safe")
+    int countSuspiciousDevices();
+
     @Query("SELECT * FROM DeviceMetadata WHERE is_safe")
     LiveData<List<DeviceMetadata>> loadSafeDeviceMetadataLive();
 

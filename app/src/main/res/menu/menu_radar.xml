@@ -13,4 +13,16 @@
     <item
         android:id="@+id/delete_history"
         android:title="@string/delete_history" />
+
+    <item
+        android:title="Force Analyze"
+        android:id="@+id/force_analyze"/>
+    <item
+        android:id="@+id/logging_mode_toggle"
+        android:checkable="true"
+        android:title="Logging Mode"
+        app:actionLayout="@layout/switch_item"  />
+
+
+
 </menu>

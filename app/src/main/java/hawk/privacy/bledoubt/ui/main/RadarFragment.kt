@@ -11,7 +11,10 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.get
+import androidx.work.WorkerParameters
+import hawk.privacy.bledoubt.HistoryAnalyzer
 import hawk.privacy.bledoubt.R
+import hawk.privacy.bledoubt.Trajectory
 import hawk.privacy.bledoubt.databinding.RadarFragmentBinding
 
 
@@ -39,7 +42,6 @@ class RadarFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
 
-        val view = binding.root
         binding.radarSwitch.setOnCheckedChangeListener { _, isChecked ->
             Log.d(TAG, "isEnabled $isChecked")
             viewModel!!.setIsRadarEnabled(isChecked)
@@ -90,6 +92,13 @@ class RadarFragment : Fragment() {
         viewModel?.getIsRadarEnabled()?.observe(viewLifecycleOwner, { enabled: Boolean ->
             backStackCallback?.isEnabled = enabled
         })
+        ///
+        // TEMP
+        //
+//        val classifier = HistoryAnalyzer.TopologicalClassifier(60f,300f,300f)
+//        HistoryAnalyzer.analyze(context, classifier)
+
+
     }
 //    override fun onActivityCreated(savedInstanceState: Bundle?) {
 //        super.onActivityCreated(savedInstanceState)
