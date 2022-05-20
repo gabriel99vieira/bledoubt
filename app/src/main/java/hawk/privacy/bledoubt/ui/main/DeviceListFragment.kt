@@ -111,7 +111,6 @@ class DeviceListFragment : Fragment() {
         const val SUSPICIOUS_TYPE = 2
         const val SAFE_TYPE = 3
 
-
         // TODO: Customize parameter initialization
         @JvmStatic
         fun newInstance(columnCount: Int) =

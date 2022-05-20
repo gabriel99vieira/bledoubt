@@ -26,6 +26,7 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.layers.Property
+import hawk.privacy.bledoubt.HistoryAnalyzer
 import hawk.privacy.bledoubt.R
 import hawk.privacy.bledoubt.databinding.InspectDeviceFragmentBinding
 
@@ -53,6 +54,11 @@ class InspectDeviceFragment : Fragment() {
         Log.d(tag, "la" +  bluetoothAddress)
         //Mapbox.getInstance(this, resources.getString(R.string.mapbox_api_key))
         binding.inspectLayoutTitle.text = bluetoothAddress
+        binding.safeCheckBox.isChecked = BeaconHistory.getAppBeaconHistory(context).isSafe(bluetoothAddress!!)
+        binding.safeCheckBox.setOnClickListener {
+            Log.i(tag, "Checked " +binding.safeCheckBox.isChecked)
+            BeaconHistory.getAppBeaconHistory(context).markSafe(bluetoothAddress!!, binding.safeCheckBox.isChecked)
+        }
 
         val traj = BeaconHistory.getAppBeaconHistory(inflater.context).getTrajectory(bluetoothAddress)
 

@@ -17,6 +17,7 @@
     <string name="foreground_channel_desc">Allows BLE-Doubt to scan continuously with a persistent notification.</string>
     <string name="suspicious_notification_title">Suspicious device found</string>
     <string name="suspicious_notification_text">We\'ve noticed a device that follows you around. Let\'s check it out together.</string>
+    <string name="multi_suspicious_notification_text">We\'ve noticed %d devices that follow you around. Let\'s check them out together.</string>
     <string name="suspicious_notification_accept">Check it out.</string>
     <string name="radar_switch_label">Scan for BLE trackers</string>
     <string name="foreground_scanning_tooltip">Scanning in the background for trackers.</string>

@@ -83,10 +83,10 @@ public class BeaconHistory {
 
     public synchronized List<DeviceMetadata> getDeviceList() {
         List<DeviceMetadata> out = Arrays.asList(dao.loadAllDeviceMetadata());
-        Log.i(TAG, String.valueOf(out.size()));
-        if (out.size() > 0)
-            for (DeviceMetadata d : out)
-                Log.i(TAG, String.valueOf(d.bluetoothAddress));
+        //Log.i(TAG, String.valueOf(out.size()));
+        //if (out.size() > 0)
+        //    for (DeviceMetadata d : out)
+        //        Log.i(TAG, String.valueOf(d.bluetoothAddress));
         return out;
     }
 
@@ -123,6 +123,10 @@ public class BeaconHistory {
     }
     public synchronized LiveData<List<DeviceMetadata>> getLiveSuspiciousDeviceList() {
         return dao.loadSuspiciousDeviceMetadataLive();
+    }
+
+    public synchronized List<DeviceMetadata> getSuspiciousDevices() {
+        return dao.loadSuspiciousDeviceMetadata();
     }
 
     /**

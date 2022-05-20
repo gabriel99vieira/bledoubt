@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -37,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -46,6 +46,7 @@ import androidx.work.WorkManager;
 import com.mapbox.mapboxsdk.Mapbox;
 
 import hawk.privacy.bledoubt.ui.main.DeviceListFragment;
+import hawk.privacy.bledoubt.ui.main.InspectDeviceFragment;
 import hawk.privacy.bledoubt.ui.main.RadarFragment;
 import hawk.privacy.bledoubt.ui.main.RadarViewModel;
 
@@ -59,13 +60,20 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
     public static final String IBEACON_LAYOUT =  "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
 
     // Request Codes
-    private static final int SAVE_TO_JSON_REQUEST_CODE = 1;
-    private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 2;
-    private static final int ENABLE_BLUETOOTH_REQUEST_CODE = 3;
+    public static final int SAVE_TO_JSON_REQUEST_CODE = 1;
+    public static final int LOCATION_PERMISSIONS_REQUEST_CODE = 2;
+    public static final int ENABLE_BLUETOOTH_REQUEST_CODE = 3;
+    public static final int INSPECT_ONE_DEVICE_EXTRA_CODE = 4;
+    public static final int INSPECT_SUSPICIOUS_DEVICES_EXTRA_CODE = 5;
+
+
+    //
+    public static final String SUSPICIOUS_DEVICE_REQUEST_KEY = "suspicious_device_code";
+    public static final String BLUETOOTH_ADDRESS_MESSAGE = "ble_address";
+
 
     // Identifier for background work request.
     private static final String BG_WORK_NAME = "TrajectoryAnalysisWork";
-
     protected static final String TAG = "[RadarActivity]";
 
     // Data management for finding beacons
@@ -81,6 +89,7 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i(TAG, "Haha!");
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case SAVE_TO_JSON_REQUEST_CODE:
@@ -94,6 +103,41 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
                 }
                 break;
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Log.i(TAG, "onNewIntent");
+        int request_key = intent.getIntExtra(SUSPICIOUS_DEVICE_REQUEST_KEY,-1);
+        Log.i(TAG, "request_key " + request_key);
+        switch (request_key) {
+            case INSPECT_ONE_DEVICE_EXTRA_CODE:
+                String bleAddressMessage = intent.getStringExtra(RadarActivity.BLUETOOTH_ADDRESS_MESSAGE);
+                Log.i(TAG, "One" + bleAddressMessage);
+                Bundle startInspectFragBundle = new Bundle();
+                startInspectFragBundle.putString(InspectDeviceFragment.BLUETOOTH_ADDRESS_MESSAGE, bleAddressMessage);
+                Fragment inspectFragment = new InspectDeviceFragment();
+                inspectFragment.setArguments(startInspectFragBundle);
+                this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, inspectFragment)
+                        .addToBackStack("inspect_device")
+                        .commit();
+                break;
+            case INSPECT_SUSPICIOUS_DEVICES_EXTRA_CODE:
+                Log.i(TAG, "Multi");
+                Bundle suspiciousBundle = new Bundle();
+                suspiciousBundle.putInt(DeviceListFragment.ARG_LIST_TYPE, DeviceListFragment.SUSPICIOUS_TYPE);
+                Fragment listFragment = new DeviceListFragment();
+                listFragment.setArguments(suspiciousBundle);
+                this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, listFragment)
+                        .addToBackStack("launch_suspicious")
+                        .commit();
+                break;
+        }
+        super.onNewIntent(intent);
     }
 
     @Override
@@ -242,6 +286,8 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
      * @param output_json_uri
      */
     private void saveToJsonActivityResult(Uri output_json_uri) {
+        if (output_json_uri == null)
+            return;
         boolean success = true;
         try (OutputStream out = getContentResolver().openOutputStream(output_json_uri)) {
             out.write(beaconHistory.toJSONObject().toString().getBytes());
@@ -269,7 +315,6 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
                 for (Beacon beacon : beacons) {
                     storeBeacon(beacon);
                 }
-                //updateRecyclerView();
             }
         });
         try {
@@ -347,7 +392,6 @@ public class RadarActivity extends AppCompatActivity implements BeaconConsumer, 
                 return true;
             case R.id.force_analyze:
                 HistoryAnalyzer.analyze(this, new HistoryAnalyzer.TopologicalClassifier(60,300,300));
-                requestUriForSaveToJson();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

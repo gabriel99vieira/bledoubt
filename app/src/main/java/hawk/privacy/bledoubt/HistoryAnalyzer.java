@@ -115,10 +115,10 @@ public class HistoryAnalyzer extends Worker {
         int suspiciousCount = history.countSuspiciousDevices();
 
         if (suspiciousCount == 1) {
-            Notifications.getInstance().createSuspiciousDeviceNotification(context, devices.get(0));
+            Notifications.getInstance().createSuspiciousDeviceNotification(context, BeaconHistory.getAppBeaconHistory(context).getSuspiciousDevices().get(0));
         } else if (suspiciousCount > 1) {
             // TODO multi-device
-            Notifications.getInstance().createSuspiciousDeviceNotification(context, devices.get(0));
+            Notifications.getInstance().createSuspiciousMultiDeviceNotification(context, suspiciousCount);
         }
        return Result.success();
     }
