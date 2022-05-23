@@ -32,7 +32,7 @@ If you use BLE-Doubt in your academic or professional work, please cite our [Saf
 
 ```bibtex
 @inproceedings{BLE-Doubt,
-  author    = "Briggs, Jimmy and Geeng, Christine"
+  author    = "Briggs, Jimmy and Geeng, Christine",
   title     = "BLE-Doubt: Smartphone-Based Detection of Malicious Bluetooth Trackers",
   booktitle = "SafeThings 2022",
   publisher = "IEEE",
