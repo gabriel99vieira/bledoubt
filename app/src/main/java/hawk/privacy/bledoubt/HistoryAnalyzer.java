@@ -49,34 +49,6 @@ public class HistoryAnalyzer extends Worker {
     public void setLoggingMode(boolean loggingModeEnabled) {
         this.analysisEnabled = !loggingModeEnabled;
     }
-     //public static Vector<Beacon> findTrackingBeacons( BeaconHistory _history) {
-      //  BeaconHistory history = new BeaconHistory(_history);
-      //  removeGeostationaryDevices(history);
-   // }
-
-    private static void removeGeostationaryDevices(BeaconHistory history) {
-//        ArrayList<String> macs_to_remove = new ArrayList<>();
-//        double latMin, latMax, longMin, longMax;
-//        for (String mac : history.getKnownMacs()) {
-//            latMin = latMax = longMin = longMax = 0;
-//            Vector<BeaconDetection> traiectory = history.getSnapshot(mac);
-//            for (BeaconDetection detection : traiectory) {
-//                latMin = Math.min(detection.latitude, latMin);
-//                latMax = Math.max(detection.latitude, latMax);
-//                longMin = Math.min(detection.longitude, longMin);
-//                longMax = Math.max(detection.longitude, longMax);
-//            }
-//            if (latLongToMeters(latMin, longMin, latMax, longMax) < 2 * MAX_BLE_RANGE_M) {
-//                macs_to_remove.add(mac);
-//            }
-//        }
-//        history.remove_all(macs_to_remove);
-    }
-
-
-
-
-
 
     public static final String TAG = "[HistoryAnalyzer]";
 
@@ -117,7 +89,6 @@ public class HistoryAnalyzer extends Worker {
         if (suspiciousCount == 1) {
             Notifications.getInstance().createSuspiciousDeviceNotification(context, BeaconHistory.getAppBeaconHistory(context).getSuspiciousDevices().get(0));
         } else if (suspiciousCount > 1) {
-            // TODO multi-device
             Notifications.getInstance().createSuspiciousMultiDeviceNotification(context, suspiciousCount);
         }
        return Result.success();
