@@ -30,11 +30,12 @@ All BLE-Doubt code, algorithms, and data are licensed under the MIT license incl
 # Citation
 If you use BLE-Doubt in your academic or professional work, please cite our [SafeThings 2022 paper](https://safe-things-2022.github.io/).
 
+```bibtex
 @inproceedings{BLE-Doubt,
   author    = "Briggs, Jimmy and Geeng, Christine"
   title     = "BLE-Doubt: Smartphone-Based Detection of Malicious Bluetooth Trackers",
   booktitle = "SafeThings 2022",
   publisher = "IEEE",
 }
-
+```
 
