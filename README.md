@@ -1,29 +1,8 @@
 # About BLE-Doubt
 
-BLE-Doubt is an Android app that helps you find Bluetooth-low-energy (BLE) trackers that may be following you around. These devices tend to be small and inconspicuous. They could easily be slipped into your pocket, purse, shoe, or vehicle by someone who wants to know your location data. BLE-Doubt runs in the background looking for suspicious devices when you're on the go, and sends you a notification  
+BLE-Doubt is an Android app that helps you find Bluetooth-low-energy (BLE) trackers that may be following you around. These devices tend to be small and inconspicuous. They could easily be slipped into your pocket, purse, shoe, or vehicle by someone who wants to know your location data. BLE-Doubt runs in the background looking for suspicious devices when you're on the go, and sends you a notification. 
 
-# Tasks
-
-- [X] Add real-time permissions for BLE.
-- [X] Create a background processing thread for trajectory analysis.
-- [X] Persistent notification for accurate scanning?
-- [X] Add packet parser for Tile devices.
-- [X] Create new constructor to load BeaconHistory from JSON.
-- [X] Create copy constructor for BeaconHistory.
-- [X] Create a notification for suspicious devices.
-- [X] Implement OUI lookup.
-- [X] Mark devices as safe.
-- [X] Add reminder to turn on bluetooth / location if necessary.
-- [ ] Generic list view for collections of devices. e,g, safe, suspicious, nearby
-- [ ] Lookup/list nearby devices
-- [ ] List safe devices / remove safe devices from safe list
-- [ ] Update map UI with prettier safe marker
-- [ ] Update map UI with timeboxing
-- [ ] Adapt UI to fit variety of phone displays
-- [ ] Improve list view UI to include device manufacturer, recency, etc
-- [ ] Change resume UI to turn the radar switch on when the radar is running.
-- [ ] Protect from public transit false alarms.
-- [ ] Create trajectory fusion algorithm for privacy mode devices.
+BLE-Doubt is a research application that you're welcome to compile and try out, but for a better UX, we recommend [AirGuard](https://play.google.com/store/apps/details?id=de.seemoo.at_tracking_detection.release&hl=en_US&gl=US) to non-expert users. The analysis used for our 2022 SafeThings paper can be found in the `analysis` directory. 
 
 
 # How does BLE-Doubt work?
@@ -43,12 +22,13 @@ Additionally, taking public transit may put you in contact with many Bluetooth d
 
 ## Detecting devices in "privacy mode"
 
-Some Bluetooth devices rotate through multiple Bluetooth addresses in an attempt to protect the privacy of the device's owner. BLE-doubt uses a Bayesian (statistical) decision algorithm to corellate the device across multiple Bluetooth addresses as it rotates through them, allowing it to identify devices in privacy mode as long as they stay a fixed difference from your phone. 
+Some Bluetooth devices rotate through multiple Bluetooth addresses in an attempt to protect the privacy of the device's owner. BLE-Doubt can detect these devices but may lose track of them after a while.
 
 # Limitations
 
-BLE-Doubt cannot guarantee your protection from malicious trackers. Some tracking devices are based on Global Positioning System (GPS) or ultra-wideband (UWB) technologies, which BLE-Doubt cannot intercept. Even some BLE trackers may deviate from the assumptions made by BLE-Doubt. For example, devices in privacy mode which randomly change their broadcasting power may not be successfully screened by BLE-Doubt. BLE-doubt also will not detect stationaty Bluetooth devices that do not follow you when you move. To locate all nearby BLE devices, you can use a Bluetooth scanning app like  [nRF Connect](https://www.nordicsemi.com/Software-and-tools/Development-Tools/nRF-Connect-for-mobile), although this may be difficult for non-expert users.
+BLE-Doubt cannot guarantee your protection from malicious trackers. Some tracking devices are based on Global Positioning System (GPS) or ultra-wideband (UWB) technologies, which BLE-Doubt cannot intercept. Even some BLE trackers may deviate from the assumptions made by BLE-Doubt. For example, some devices in privacy mode who change their Bluetooth addresses very frequently may not be successfully screened by BLE-Doubt. BLE-doubt also will not detect stationaty Bluetooth devices that do not follow you when you move. To locate all nearby BLE devices, you can use a Bluetooth scanning app like  [nRF Connect](https://www.nordicsemi.com/Software-and-tools/Development-Tools/nRF-Connect-for-mobile), although this may be difficult for non-expert users.
 
 # License 
 
-BLE-Doubt is under the MIT license included in the `LICENSE` file.
+BLE-Doubt is under the MIT license included in the `LICENSE` file. If you use BLE-Doubt in your work, please cite our [SafeThings 2022 paper](https://safe-things-2022.github.io/).
+
