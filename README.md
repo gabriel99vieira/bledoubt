@@ -1,6 +1,6 @@
 # About BLE-Doubt
 
-BLE-Doubt is an Android app that helps you detect Bluetooth-low-energy (BLE) trackers like AirTags, Tiles, and Chipolos that may be following you around. These devices tend to be small and inconspicuous. They could easily be slipped into your pocket, purse, shoe, or vehicle by someone who wants to know your location data. BLE-Doubt runs in the background looking for suspicious devices when you're on the go, and sends you a notification. 
+BLE-Doubt is an Android app that helps you detect Bluetooth-low-energy (BLE) trackers like AirTags, Tiles, and Chipolos that may be following you around. These devices tend to be small and inconspicuous. They could easily be slipped into your pocket, purse, shoe, or vehicle by someone who wants to know your location data. BLE-Doubt runs in the background looking for suspicious devices when you're on the go, and sends you a notification if it finds something suspicious. 
 
 BLE-Doubt is a research application that you're welcome to compile and try out, but for a better UX, we recommend [AirGuard](https://play.google.com/store/apps/details?id=de.seemoo.at_tracking_detection.release&hl=en_US&gl=US) to non-expert users. The analysis used for our 2022 SafeThings paper can be found in the `analysis` directory. 
 
