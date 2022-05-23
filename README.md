@@ -28,7 +28,7 @@ BLE-Doubt cannot guarantee your protection from malicious trackers. Some trackin
 All BLE-Doubt code, algorithms, and data are licensed under the MIT license included in the `LICENSE` file. 
 
 # Citation
-If you use BLE-Doubt in your academic or professional work, please cite our [SafeThings 2022 paper](https://safe-things-2022.github.io/).
+If you use BLE-Doubt in your academic or professional work, we ask that you cite our [SafeThings 2022 paper](https://safe-things-2022.github.io/).
 
 ```bibtex
 @inproceedings{BLE-Doubt,
